@@ -81,7 +81,6 @@ void JWaveSpectrumGpu::CopyCoefs(unsigned sizewavecoefs,const tdouble4 *d4,const
 
 //==============================================================================
 /// Returns paddle position using 2nd order wave theory.
-
 //==============================================================================
 double JWaveSpectrumGpu::CalcPosition(double time,unsigned sizewavecoefs){
   #ifdef _WITHGPU

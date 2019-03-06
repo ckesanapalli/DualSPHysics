@@ -57,7 +57,7 @@ JMotionMovActive::~JMotionMovActive(){
 }
 
 //==============================================================================
-// Reset assigned memory and movement data RectFile and RotFile.
+// Resetea memoria asignada y datos de movimientos RectFile y RotFile.
 //==============================================================================
 void JMotionMovActive::DfReset(){
   DfTimes=NULL;
@@ -70,7 +70,7 @@ void JMotionMovActive::DfReset(){
 }
 
 //==============================================================================
-// Set up active mov data
+// Configura datos del mov activo
 //==============================================================================
 void JMotionMovActive::ConfigData(){
   DfReset();
@@ -91,7 +91,7 @@ void JMotionMovActive::ConfigData(){
 }
 
 //==============================================================================
-// Load and configure movement data from data file.
+// Carga y configura datos del movimiento a partir de fichero de datos.
 //==============================================================================
 void JMotionMovActive::DfConfig(bool postype){
   const char met[]="DfConfig";
@@ -116,8 +116,8 @@ void JMotionMovActive::DfConfig(bool postype){
 }
 
 //==============================================================================
-// Returns the position of times [] closest next to t or the last when
-// t is greater than the last value.
+// Devuelve posicion de times[] mas proxima por debajo de t o la ultima cuando
+// t es mayor que el ultimo valor.
 //==============================================================================
 unsigned JMotionMovActive::BinarySearch(unsigned size,const double *times,double t){
   //unsigned n=0;
@@ -146,7 +146,7 @@ unsigned JMotionMovActive::BinarySearch(unsigned size,const double *times,double
 }
 
 //==============================================================================
-// Returns the next position as a function of the instant indicated
+// Devuelve la siguiente posicion en funcion del instante indicado
 //==============================================================================
 tdouble3 JMotionMovActive::DfGetNewPos(double t){
   tdouble3 newpos;
@@ -364,8 +364,8 @@ void JMotionObj::ResetTime(){
 }
 
 //==============================================================================
-// Calculate object displacement
-// Returns true if the object or one of its children is active. Object displacement
+// Calcula desplazamiento de objeto
+// Devuelve true si el objeto o alguno de sus hijos esta activo.
 //==============================================================================
 bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsigned &lismovcount,JMotionObj** lisstop,unsigned &lisstopcount){
   //printf("ProcesTime-> %f %f  \n",timestep,dt);
@@ -616,7 +616,7 @@ void JMotionObj::GetRefs(std::vector<int> &refs)const{
 }
 
 //==============================================================================
-// Copy the configuration of movements to mot.
+// Copia la configuracion de los movimientos a mot.
 //==============================================================================
 void JMotionObj::CopyConfigMovs(JMotion &mot)const{
   for(int c=0;c<int(Movs.size());c++){

@@ -66,6 +66,8 @@
 //:#   ,Double3xStr(),Double3xRangeStr(). (31-01-2018)
 //:# - Error corregido en MkdirPath(). No soportaba rutas absolutas de Linux. (21-05-2018)
 //:# - Nuevas funciones StrFileToVector(), StrVectorToFile() y StrFileError(). (11-07-2018)
+//:# - Nuevas funciones StrTrimBegin() y StrTrimEnd(). (29-08-2018)
+//:# - Nuevas funciones GetDateTimeFormatUTC(), GetWeekDay(), GetYearDay() y GetWeekNumber(). (24-10-2018)
 //:#############################################################################
 
 /// \file Functions.h \brief Declares basic/general functions for the entire application.
@@ -85,6 +87,12 @@ namespace fun{
 std::string GetDateTimeFormat(const char* format,int nseg=0);
 inline std::string GetDateTime(){ return(GetDateTimeFormat("%d-%m-%Y %H:%M:%S",0)); }
 inline std::string GetDateTimeAfter(int nseg){ return(GetDateTimeFormat("%d-%m-%Y %H:%M:%S",nseg)); }
+
+std::string GetDateTimeFormatUTC(const char* format,int day,int month,int year,int hour=0,int min=0,int sec=0);
+int GetWeekDay(int day,int month,int year);
+int GetYearDay(int day,int month,int year);
+int GetWeekNumber(int day,int month,int year);
+
 std::string GetHoursOfSeconds(double s);
 
 std::string GetTextRandomCode(unsigned length);
@@ -149,6 +157,8 @@ inline tfloat3  StrToFloat3 (const std::string &v){ return(ToTFloat3(StrToDouble
 std::string StrUpper(const std::string &cad);
 std::string StrLower(const std::string &cad);
 std::string StrTrim(const std::string &cad);
+std::string StrTrimBegin(const std::string &cad);
+std::string StrTrimEnd(const std::string &cad);
 std::string StrTrimRepeated(const std::string &cad);
 std::string StrWithoutChar(const std::string &cad,char let);
 std::string StrRepeat(const std::string &cad,unsigned count);

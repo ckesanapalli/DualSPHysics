@@ -37,12 +37,6 @@ namespace cuwave2{
 dim3 GetGridSize(unsigned n,unsigned blocksize);
 
 //-Kernels for JWaveSpectrum.
-//time
-//n = Grid size
-//dnm = Order2CoefsDnmg =
-//coefx = Order2CoefsPosg = S(0,i)/2
-//aux = extra term to generate second order wave
-
 unsigned GetSizeAux(unsigned n);
 double CalcPosition(double time,unsigned n,const double *dnm,const double2 *coefx,double *aux);
 double CalcElevation(double time,double x,unsigned n,const double4 *coefe,double *aux);
