@@ -607,6 +607,8 @@ void JSph::LoadCaseConfig(){
     WaveGen=new JWaveGen(useomp,!Cpu,Log,DirCase,&xml,"case.execution.special.wavepaddles");
     if(SphMotion)for(unsigned c=0;c<SphMotion->GetNumObjects();c++){
       WaveGen->ConfigPaddle(SphMotion->GetObjMkBound(c),c,SphMotion->GetObjBegin(c),SphMotion->GetObjSize(c));
+      printf("Wave Gen parameters",WaveGen);
+	  //Chaitanya
     }
   }
 

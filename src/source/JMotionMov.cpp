@@ -26,7 +26,7 @@
 //# JMotionMovXXX
 //##############################################################################
 //==============================================================================
-// Guarda configuracion de movimiento en formato xml
+// Saves movement settings in xml format
 //==============================================================================
 void JMotionMovWait::WriteXml(TiXmlNode* node)const{
   TiXmlElement item("wait"); 
@@ -258,7 +258,7 @@ void JMotionDataFile::Reset(){
 }
 
 //==============================================================================
-// Modifica la asignacion de memoria para los vectores de MovRectFile y MovRotFile
+// Modify the memory allocation for the MovRectFile and MovRotFile vectors
 //==============================================================================
 void JMotionDataFile::Resize(unsigned size){
   //printf("JMotionMovActive::DfResize> %u --> %u\n",DfSize,size);
@@ -284,7 +284,7 @@ void JMotionDataFile::Resize(unsigned size){
 }
 
 //==============================================================================
-// Carga y configura datos del movimiento a partir de fichero de datos.
+// Load and configure movement data from data file.
 //==============================================================================
 void JMotionDataFile::LoadFilePos(std::string dirdata,std::string file,const int fields,const int fieldtime,const int fieldx,const int fieldy,const int fieldz){
   const char met[]="LoadFilePos";
@@ -315,7 +315,7 @@ void JMotionDataFile::LoadFilePos(std::string dirdata,std::string file,const int
 }
 
 //==============================================================================
-// Carga y configura datos del movimiento a partir de fichero de datos.
+// Load and configure movement data from data file.
 //==============================================================================
 void JMotionDataFile::LoadFileAng(std::string dirdata,std::string file,bool angdegrees){
   const char met[]="LoadFileAng";

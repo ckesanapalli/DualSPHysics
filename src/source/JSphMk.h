@@ -19,7 +19,7 @@
 //:#############################################################################
 //:# Cambios:
 //:# =========
-//:# - Creacion de clase para gestionar informacion relativa a MK de particulas. (25-01-2018)
+//:# - Class creation to manage information related to particle MK. (25-01-2018)
 //:#############################################################################
 
 /// \file JSphMk.h \brief Declares the class \ref JSphMk.

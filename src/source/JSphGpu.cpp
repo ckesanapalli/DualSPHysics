@@ -1395,5 +1395,3 @@ void JSphGpu::DgSaveCsvParticles2(std::string filename,int numfile,unsigned pini
   }
   else RunException(met,"File could not be opened.",filename);
 }
-
-

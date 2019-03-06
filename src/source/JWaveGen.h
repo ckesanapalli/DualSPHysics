@@ -106,11 +106,10 @@ public:
 
 
   unsigned GetCount()const{ return(Count); }
+
   bool UseAwas()const{ return(Use_Awas); } 
 
 };
 
 
 #endif
-
-

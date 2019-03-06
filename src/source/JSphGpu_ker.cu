@@ -1959,7 +1959,7 @@ void ComputeStepPos2(byte periactive,bool floating,unsigned np,unsigned npb
 //# Kernels para Motion
 //##############################################################################
 //------------------------------------------------------------------------------
-/// Computes for a range of particles, their position according to idp[].
+/// Computes for a range of particles, their position according to idp[]. id of particle
 /// Calcula para un rango de particulas calcula su posicion segun idp[].
 //------------------------------------------------------------------------------
 __global__ void KerCalcRidp(unsigned n,unsigned ini,unsigned idini,unsigned idfin,const typecode *code,const unsigned *idp,unsigned *ridp)
@@ -2018,6 +2018,7 @@ template<bool periactive> __global__ void KerMoveLinBound(unsigned n,unsigned in
     if(pid>=0){
       //-Computes displacement and updates position.
       KerUpdatePos<periactive>(posxy[pid],posz[pid],mvpos.x,mvpos.y,mvpos.z,false,pid,posxy,posz,dcell,code);
+	  
       //-Computes velocity.
       velrhop[pid]=make_float4(mvvel.x,mvvel.y,mvvel.z,velrhop[pid].w);
     }

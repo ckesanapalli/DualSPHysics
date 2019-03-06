@@ -165,7 +165,7 @@ JMotionAxis* JMotion::AxisAdd(unsigned objid,const tdouble3 &p1,const tdouble3 &
 }
 
 //==============================================================================
-// Añade un nuevo movimiento
+// Add a new movement
 //==============================================================================
 void JMotion::MovAdd(unsigned objid,JMotionMov* mov){
   const char met[]="MovAdd";
@@ -245,6 +245,14 @@ void JMotion::MovAddRecSinu(unsigned objid,unsigned id,unsigned nextid,double ti
   MovAdd(objid,new JMotionMovRectSinu(id,nextid,time,angdegrees,freq,ampl,phase,phaseprev));
 }
 //==============================================================================
+// Añade un movimiento rectilineo sinusoidal
+//==============================================================================
+//void JMotion::MovAddVarRecSinu(unsigned objid,unsigned id,unsigned nextid,double time,bool angdegrees,const tdouble3 &freq,const tdouble3 &ampl,tdouble3 phase,bool phaseprev,bool useangdegrees){
+//  if(useangdegrees && angdegrees)phase=phase*TDouble3(TORAD); //-Convierte a radianes.
+//  MovAdd(objid,new JMotionVarMovRectSinu(id,nextid,time,angdegrees,freq,ampl,phase,phaseprev));
+//}
+
+//==============================================================================
 // Añade un movimiento de rotacion sinusoidal
 //==============================================================================
 void JMotion::MovAddRotSinu(unsigned objid,unsigned id,unsigned nextid,double time,bool angdegrees,const tdouble3 &axisp1,const tdouble3 &axisp2,double freq,double ampl,double phase,bool phaseprev,bool useangdegrees){
@@ -261,7 +269,7 @@ void JMotion::MovAddCirSinu(unsigned objid,unsigned id,unsigned nextid,double ti
   MovAdd(objid,new JMotionMovCirSinu(id,nextid,time,angdegrees,AxisAdd(objid,axisp1,axisp2),AxisAdd(objid,ref,ref),freq,ampl,phase,phaseprev));
 }
 //==============================================================================
-// Añade un movimiento rectilineo a partir de datos de un fichero.
+// Add a rectilinear movement from data in a file.
 // - fields: Numero total de campos en el fichero.
 // - fieldtime: Posicion del campo time dentro de fields.
 // - fieldx: Posicion del campo x dentro de fields (menor que 0 se ignora).
@@ -415,7 +423,7 @@ bool JMotion::ProcesTimeAce(double timestep,double dt){
 }
 
 //==============================================================================
-// Nuevo metodo para devolver resultados de ProcesTimeSimple() o ProcesTimeAce().
+// New method to return results from ProcesTimeSimple () or ProcesTimeAce ().
 // Returns data of one moving object. Returns true when the motion is active.
 //==============================================================================
 bool JMotion::ProcesTimeGetData(unsigned ref,bool &typesimple,tdouble3 &simplemov
@@ -438,11 +446,11 @@ void JMotion::ResetTime(double timestep){
 }
 
 //==============================================================================
-// Revisa lista de eventos para crear nuevos movimientos activos.
+// Review list of events to create new active movements.
 // Devuelve true si hay movimientos activos.
 //==============================================================================
 bool JMotion::ProcesTime(double timestep,double dt){
-  //printf("ProcesTime> timestep:%f dt:%f  \n",timestep,dt);
+  printf("_________________ ************* _______________ProcesTime> timestep:%f dt:%f  \n",timestep,dt);
   if(!Prepared)RunException("ProcesEvent","Invalid method in initialization mode.");
   //-Comprueba eventos para activar nuevos movimientos.
   bool looking=true;
@@ -550,7 +558,7 @@ void JMotion::WriteXml(JXml *jxml,const std::string &path)const{
 }
 
 //==============================================================================
-// Carga configuracion de motion en formato xml
+// Load motion configuration in xml format
 //==============================================================================
 void JMotion::ReadXml(const std::string &dirdata,JXml *jxml,TiXmlNode* node,unsigned &id,unsigned idp){
   TiXmlElement* ele=node->FirstChildElement(); 

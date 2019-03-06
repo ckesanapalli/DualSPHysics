@@ -2,7 +2,7 @@
 
 rem "name" and "dirout" are named according to the testcase
 
-set name=CaseDambreakVal2D
+set name=CaseWavemaker
 set dirout=%name%_out
 set diroutdata=%dirout%\data
 
@@ -21,34 +21,51 @@ set isosurface="%dirbin%/IsoSurface4_win64.exe"
 set flowtool="%dirbin%/FlowTool4_win64.exe"
 set floatinginfo="%dirbin%/FloatingInfo4_win64.exe"
 
-rem "dirout" to store results is removed if it already exists
+rem "dirout" is created to store results or it is removed if it already exists
+
 if exist %dirout% rd /s /q %dirout%
+mkdir %dirout%
+if not "%ERRORLEVEL%" == "0" goto fail
+mkdir %diroutdata%
 
 rem CODES are executed according the selected parameters of execution in this testcase
 
-rem Executes GenCase4 to create initial files for simulation.
 %gencase% %name%_Def %dirout%/%name% -save:all
 if not "%ERRORLEVEL%" == "0" goto fail
 
-rem Executes DualSPHysics to simulate SPH method.
+set dirout2=%dirout%\boundary
+mkdir %dirout2%
+%boundaryvtk% -loadvtk %dirout%/%name%__Actual.vtk -filexml %dirout%/%name%.xml -savevtkdata %dirout2%/MotionPREPiston -onlymk:21  
+if not "%ERRORLEVEL%" == "0" goto fail
+
 %dualsphysicsgpu% -gpu %dirout%/%name% %dirout% -dirdataout data -svres
 if not "%ERRORLEVEL%" == "0" goto fail
 
-rem Executes PartVTK4 to create VTK files with particles.
+%boundaryvtk% -loadvtk %dirout%/%name%__Actual.vtk -filexml %dirout%/%name%.xml -motiondatatime %diroutdata% -savevtkdata %dirout2%/MotionPiston -onlymk:21 -savevtkdata %dirout2%/Box.vtk -onlymk:11
+if not "%ERRORLEVEL%" == "0" goto fail
+
 set dirout2=%dirout%\particles
-%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFluid -onlytype:-all,fluid -vars:+idp,+vel,+rhop,+press,+vor
+mkdir %dirout2%
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFLuid -onlytype:-all,+fluid
 if not "%ERRORLEVEL%" == "0" goto fail
 
-%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartBound -onlytype:-all,bound -vars:-all -last:0
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartPiston -onlytype:-all,+moving
 if not "%ERRORLEVEL%" == "0" goto fail
 
-rem Executes PartVTKOut4 to create VTK files with excluded particles.
 %partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
 if not "%ERRORLEVEL%" == "0" goto fail
 
-rem Executes IsoSurface4 to create VTK files with slices of surface.
+set dirout2=%dirout%\measuretool
+mkdir %dirout2%
+%measuretool% -dirin %diroutdata% -points CaseWavemaker_PointsHeights.txt -onlytype:-all,+fluid -height -savevtk %dirout2%/PointsHeights -savecsv %dirout2%/_PointsHeight 
+if not "%ERRORLEVEL%" == "0" goto fail
+
+%measuretool% -dirin %diroutdata% -points CaseWavemaker_wg0_3D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_WG0 
+if not "%ERRORLEVEL%" == "0" goto fail
+
 set dirout2=%dirout%\surface
-%isosurface% -dirin %diroutdata% -saveslice %dirout2%/Slices 
+mkdir %dirout2%
+%isosurface% -dirin %diroutdata% -saveiso %dirout2%/Surface 
 if not "%ERRORLEVEL%" == "0" goto fail
 
 

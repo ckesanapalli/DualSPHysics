@@ -16,3 +16,6 @@ _out_UpdateHelp
 ## Ignores temporary files.
 bin/windows/*.iobj
 bin/windows/*.ipdb
+*.vtk
+*.bi4
+*.out

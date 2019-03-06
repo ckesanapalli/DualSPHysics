@@ -2,9 +2,8 @@
 
 # "name" and "dirout" are named according to the testcase
 
-name=CaseDambreakVal2D
+name=CaseWavemaker
 dirout=${name}_out
-diroutdata=${dirout}/data
 
 # "executables" are renamed and called from their directory
 
@@ -24,54 +23,73 @@ floatinginfo="${dirbin}/FloatingInfo4_linux64"
 # Library path must be indicated properly
 
 current=$(pwd)
-cd $dirbin
+cd ${dirbin}
 path_so=$(pwd)
 cd $current
 export LD_LIBRARY_PATH=$path_so
 
-# "dirout" to store results is removed if it already exists
-if [ -e $dirout ]; then
-  rm -r $dirout
-fi
+# "dirout" is created to store results or it is cleaned if it already exists
 
+if [ -e $dirout ]; then
+  rm -f -r $dirout
+fi
+mkdir $dirout
+diroutdata=${dirout}/data; mkdir $diroutdata
 
 # CODES are executed according the selected parameters of execution in this testcase
 errcode=0
 
-# Executes GenCase4 to create initial files for simulation.
 if [ $errcode -eq 0 ]; then
   $gencase ${name}_Def $dirout/$name -save:all
   errcode=$?
 fi
 
-# Executes DualSPHysics to simulate SPH method.
+dirout2=${dirout}/boundary; mkdir $dirout2
 if [ $errcode -eq 0 ]; then
-  $dualsphysicscpu $dirout/$name $dirout -dirdataout data -svres
-  errcode=$?
-fi
-
-# Executes PartVTK4 to create VTK files with particles.
-dirout2=${dirout}/particles
-if [ $errcode -eq 0 ]; then
-  $partvtk -dirin $diroutdata -savevtk $dirout2/PartFluid -onlytype:-all,fluid -vars:+idp,+vel,+rhop,+press,+vor
+  $boundaryvtk -loadvtk $dirout/${name}__Actual.vtk -filexml $dirout/${name}.xml  -savevtkdata $dirout/MotionPREPiston -onlymk:21
   errcode=$?
 fi
 
 if [ $errcode -eq 0 ]; then
-  $partvtk -dirin $diroutdata -savevtk $dirout2/PartBound -onlytype:-all,bound -vars:-all -last:0
+  $dualsphysicsgpu $dirout/$name $dirout -dirdataout data -svres -gpu
   errcode=$?
 fi
 
-# Executes PartVTKOut4 to create VTK files with excluded particles.
+if [ $errcode -eq 0 ]; then
+  $boundaryvtk -loadvtk $dirout/${name}__Actual.vtk -filexml $dirout/${name}.xml -motiondatatime $diroutdata -savevtkdata $dirout2/MotionPiston -onlymk:21 -savevtkdata $dirout2/Box.vtk -onlymk:11
+  errcode=$?
+fi
+
+dirout2=${dirout}/particles; mkdir $dirout2
+if [ $errcode -eq 0 ]; then
+  $partvtk -dirin $diroutdata -savevtk $dirout2/PartFluid -onlytype:-all,+fluid
+  errcode=$?
+fi
+
+if [ $errcode -eq 0 ]; then
+  $partvtk -dirin $diroutdata -savevtk $dirout2/PartFluid -onlytype:-all,+moving
+  errcode=$?
+fi
+
 if [ $errcode -eq 0 ]; then
   $partvtkout -dirin $diroutdata -savevtk $dirout2/PartFluidOut -SaveResume $dirout2/_ResumeFluidOut
   errcode=$?
 fi
 
-# Executes IsoSurface4 to create VTK files with slices of surface.
-dirout2=${dirout}/surface
+dirout2=${dirout}/measuretool; mkdir $dirout2
 if [ $errcode -eq 0 ]; then
-  $isosurface -dirin $diroutdata -saveslice $dirout2/Slices 
+  $measuretool -dirin $diroutdata -points CaseWavemaker_PointsHeights.txt -onlytype:-all,+fluid -height -savevtk $dirout2/PointsHeights -savecsv $dirout2/_PointsHeights
+  errcode=$?
+fi
+
+if [ $errcode -eq 0 ]; then
+  $measuretool -dirin $diroutdata -points CaseWavemaker_wg0_3D.txt -onlytype:-all,+fluid -height -savecsv $dirout2/_WG0 
+  errcode=$?
+fi
+
+dirout2=${dirout}/surface; mkdir $dirout2
+if [ $errcode -eq 0 ]; then
+  $isosurface -dirin $diroutdata -saveiso $dirout2/Surface 
   errcode=$?
 fi
 
