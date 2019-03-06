@@ -214,7 +214,7 @@
       </IgnoreAllDefaultLibraries>
       <LinkStatus>
       </LinkStatus>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>OFF</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>IF EXIST cg_variables.h move cg_variables.h $(Configuration)\
@@ -266,7 +266,7 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
-      <AdditionalDependencies>JWaveGen_$(PlatformName)_$(PlatformToolset)_Release.lib;JFormatFiles2_$(PlatformName)_$(PlatformToolset)_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>JWaveGen_x64_v140_Release.lib;JFormatFiles2_x64_v140_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkStatus>
       </LinkStatus>
     </Link>
@@ -305,19 +305,19 @@
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
       <CompileAs>CompileAsCpp</CompileAs>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <OutputFile>$(TargetPath)</OutputFile>
-      <AdditionalLibraryDirectories>../lib/vs2015;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\vs2017;..\..\bin\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>
       </OptimizeReferences>
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
-      <AdditionalDependencies>JWaveGen_x64_v140_Debug.lib;JFormatFiles2_x64_v140_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>JWaveGen_$(Platform)_$(DefaultPlatformToolset)_Debug.lib;JFormatFiles2_$(Platform)_$(DefaultPlatformToolset)_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkStatus>
       </LinkStatus>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>

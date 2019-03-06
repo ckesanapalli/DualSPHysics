@@ -482,10 +482,10 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
               double t=(amov->Flash? -mv->Time: dtmov);
               tdouble3 ph=amov->Phase;
               tdouble3 p1=TDouble3(0),p2=TDouble3(0);
-              if(mv->Ampl.x){
+			  if(mv->Ampl.x){
                 p1.x=mv->Ampl.x*sin(ph.x); ph.x+=double(mv->Freq.x*TWOPI*t); p2.x=mv->Ampl.x*sin(ph.x);
               }
-              if(mv->Ampl.y){
+			  if(mv->Ampl.y){
                 p1.y=mv->Ampl.y*sin(ph.y); ph.y+=double(mv->Freq.y*TWOPI*t); p2.y=mv->Ampl.y*sin(ph.y);
               }
               if(mv->Ampl.z){
