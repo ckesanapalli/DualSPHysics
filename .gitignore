@@ -7,7 +7,9 @@ src/VS/*
 !src/VS/*.sln
 
 ## Ignores output of examples in 01_DamBreak.
-examples/main/01_DamBreak/*_out
+examples/main/06_Wavemaker
+examples/main/06_Wavemaker2
+examples/main/07_WavemakerFile/CaseWavemaker2D*out*
 
 ## Ignores other directories.
 __Tools__
@@ -17,6 +19,4 @@ _out_CompileLinux
 ## Ignores temporary files.
 bin/windows/*.iobj
 bin/windows/*.ipdb
-*.vtk
-*.bi4
-*.out
+backup

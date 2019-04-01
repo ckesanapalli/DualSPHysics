@@ -41,7 +41,7 @@ void JMotionPos::Reset(){
 }
 
 //==============================================================================
-// Aplica movimiento lineal.
+// Applies linear movement
 //==============================================================================
 void JMotionPos::Move(const tdouble3 &dis){
   if(TypeSimple)PosSimple=TDouble3(PosSimple.x+dis.x,PosSimple.y+dis.y,PosSimple.z+dis.z);
@@ -56,7 +56,7 @@ void JMotionPos::Move(const tdouble3 &dis){
 }
 
 //==============================================================================
-// Aplica rotacion.
+// Apply rotation.
 //==============================================================================
 void JMotionPos::Rotate(double ang,const tdouble3 &axisp1,const tdouble3 &axisp2){
   if(TypeSimple)ToMatrix();
@@ -78,16 +78,16 @@ void JMotionPos::Rotate(double ang,const tdouble3 &axisp1,const tdouble3 &axisp2
 }
 
 //==============================================================================
-// Aplica movimiento.
+// Applies movement.
 //==============================================================================
 void JMotionPos::MoveMix(const JMotionPos &modpos){
   if(TypeSimple&&!modpos.TypeSimple)ToMatrix();
   if(modpos.TypeSimple)Move(modpos.PosSimple);
-  else PosMatrix.Mul(modpos.PosMatrix);//<-Usando MulPre() da problemas...
+  else PosMatrix.Mul(modpos.PosMatrix);//<-Using MulPre () gives problems ...
 }
 
 //==============================================================================
-// Convierte objeto a tipo matriz.
+// Convert object to matrix type.
 //==============================================================================
 void JMotionPos::ToMatrix(){
   if(TypeSimple){
@@ -99,7 +99,7 @@ void JMotionPos::ToMatrix(){
 }
 
 //==============================================================================
-// Devuelve punto modificado al aplicarle el desplazamiento de PosSimple/PosMatrix
+// Returns modified point by applying the PosSimple / PosMatrix offset
 //==============================================================================
 tdouble3 JMotionPos::PointMove(const tdouble3 &p) const{
   return(TypeSimple? TDouble3(p.x+PosSimple.x,p.y+PosSimple.y,p.z+PosSimple.z): PosMatrix.MulPoint(p));

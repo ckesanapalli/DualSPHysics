@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<case >
+    <casedef>
+        <constantsdef>
+            <!--DEFINITION OF CONSTANTS -->		
+            <lattice bound="1" fluid="1" />			
+            <gravity x="0" y="0" z="-9.81" comment="Gravitational acceleration" units_comment="m/s^2" />
+            <rhop0 value="1000" comment="Reference density of the fluid" units_comment="kg/m^3" />
+            <hswl value="0" auto="true" comment="Maximum still water level to calculate speedofsound using coefsound" units_comment="metres (m)" />
+            <gamma value="7" comment="Polytropic constant for water used in the state equation" />
+            <speedsystem value="0" auto="true" comment="Maximum system speed (by default the dam-break propagation is used)" />
+            <coefsound value="20" comment="Coefficient to multiply speedsystem" />
+            <speedsound value="0" auto="true" comment="Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)" />
+            <coefh value="1.5" comment="Coefficient to calculate the smoothing length (h=coefh*sqrt(3*dp^2) in 3D)" />			
+            <cflnumber value="0.2" comment="Coefficient to multiply dt" />		
+        </constantsdef>
+        <mkconfig boundcount="230" fluidcount="10">
+            <mkorientfluid mk="0" orient="Xyz" />
+        </mkconfig>
+        <geometry>
+            <!--DEFINITION OF DOMAIN WHERE PARTICLES WILL BE CREATED -->
+            <definition dp="0.03" units_comment="metres (m)">
+                <pointmin x="0.5" y="0.2" z="-0.2" />
+                <pointmax x="6.5" y="0.2" z="1" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | real | bound</setshapemode>
+                    <setdrawmode mode="solid" />
+                    <!--CREATION OF BOUNDARY PARTICLES (WAVEMAKER) -->
+                    <setmkbound mk="10" />
+                    <drawbox cmt="Piston">
+                        <boxfill>solid</boxfill>
+                        <point x="1" y="0" z="0" />
+                        <size x="0.12" y="0.37" z="0.55" />
+                    </drawbox>
+                    <!--CREATION OF BOUNDARY PARTICLES (WALLS OF TANK) -->
+                    <setmkbound mk="20" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="10" y="0.37" z="0.55" />
+                    </drawbox>
+                    <shapeout file="box" reset="true" />
+                    <setdrawmode mode="full" />
+                    <!--CREATION OF BOUNDARY PARTICLES (STRUCTURE FROM STL) -->
+                    <setmkbound mk="50" />
+                    <move x="4" y="0.0" z="0.0" />
+                    <drawfilestl file="CaseWavemaker2D_Structure.stl" />
+                    <matrixreset />
+                    <!--CREATION OF FLUID PARTICLES (FILLBOX WITH WATER) -->
+                    <setmkfluid mk="0" />
+                    <fillbox x="3" y="0.2" z="0.1">
+                        <modefill>void</modefill>
+                        <point x="0.5" y="0" z="0" />
+                        <size x="16" y="0.3" z="0.31" />
+                    </fillbox>
+                    <setmkfluid mk="0" />
+                    <shapeout file="" reset="true" />
+                </mainlist>
+            </commands>
+        </geometry>
+        <motion>
+            <!--MOVEMENT OF WAVEMAKER FROM AN EXTERNAL FILE -->
+            <objreal ref="10">
+                <begin mov="1" start="0.00" finish="100" />
+				<mvrectsinu id="1" duration="1000" anglesunits="radians">
+                    <freq x="0.3183" y="0" z="0" />
+                    <ampl x="0.03" y="0" z="0" />
+                    <phase x="0" y="0" z="0" />
+                </mvrectsinu>
+                <!-- <mvfile id="1" duration="25"> -->
+                    <!-- <file name="CaseWavemaker2D_Piston_Movement.dat" fields="3" fieldtime="0" fieldx="1" /> -->
+                <!-- </mvfile> -->
+            </objreal>
+        </motion>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="PosDouble" value="1" comment="Precision in particle interaction 0:Simple, 1:Double, 2:Uses and saves double (default=0)" />		
+            <parameter key="StepAlgorithm" value="2" comment="Step Algorithm 1:Verlet, 2:Symplectic (def=1)" />
+            <parameter key="VerletSteps" value="40" comment="Verlet only: Number of steps to apply Eulerian equations (def=40)" />
+            <parameter key="Kernel" value="2" comment="Interaction Kernel 1:Cubic Spline, 2:Wendland (def=1)" />
+            <parameter key="ViscoTreatment" value="1" comment="Viscosity Formulation 1:Artificial, 2:Laminar+SPS (def=1)" />
+            <parameter key="Visco" value="0.02" comment="Viscosity value" /> % Note alpha can depend on the resolution. A value of 0.01 is recommended for near irrotational flows.
+            <parameter key="ViscoBoundFactor" value="0" comment="Multiply viscosity value with boundary (def=1)" />
+            <parameter key="DeltaSPH" value="0.0" comment="DeltaSPH value, 0.1 is the typical value, with 0 disabled (def=0)" />
+            <parameter key="CoefDtMin" value="0.05" comment="Coefficient to calculate minimum time step dtmin=coefdtmin*h/speedsound (def=0.05)" />
+            <parameter key="#DtIni" value="0.0001" comment="Initial time step (def=h/speedsound)" />
+            <parameter key="#DtMin" value="0.00001" comment="Minimum time step (def=coefdtmin*h/speedsound)" />
+            <parameter key="#DtFixed" value="DtFixed.dat" comment="Dt values are loaded from file (def=disabled)" />
+            <parameter key="TimeMax" value="10" comment="Time of simulation" />
+            <parameter key="TimeOut" value="0.1" comment="Time between output files" />
+            <parameter key="IncZ" value="0.5" comment="Increase of Z+" />
+            <parameter key="PartsOutMax" value="1" comment="%/100 of fluid particles allowed to be excluded from domain (default=1)" units_comment="decimal" />
+            <parameter key="RhopOutMin" value="700" comment="Minimum rhop valid (default=700)" units_comment="kg/m^3" />
+            <parameter key="RhopOutMax" value="1300" comment="Maximum rhop valid (default=1300)" units_comment="kg/m^3" />
+        </parameters>
+    </execution>
+</case>

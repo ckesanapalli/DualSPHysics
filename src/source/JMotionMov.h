@@ -192,6 +192,9 @@ public:
   const tdouble3 Ampl;  //-Amplitude, siempre en metros.
   const tdouble3 Phase; //-Siempre en radianes.
   const bool PhasePrev;
+// =============================================================================
+  const tdouble3 DfLastPos; //-My addition Last position of the particle
+// =============================================================================
   JMotionMovRectSinu(unsigned id,unsigned nextid,double time,bool angdegrees,const tdouble3 &freq,const tdouble3 &ampl,const tdouble3 &phase,bool phaseprev):JMotionMovBlock("JMotionMovRectSinu",RectilinearSinusoidal,id,nextid,time),AngDegrees(angdegrees),Freq(freq),Ampl(ampl),Phase(phase),PhasePrev(phaseprev){}
   void WriteXml(TiXmlNode* node)const;
 };

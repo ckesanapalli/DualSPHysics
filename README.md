@@ -25,24 +25,24 @@ If you need help check out the wiki for this project.
 
 You can build a Docker container of DualSPHysics using the provided Dockerfile. The Docker-container can be build with the following command:
 
-```
+```dockerfile
 docker build -t dualsphysics .
 ```
 
 After a successful build, you can run DualSPHysics using docker:
 
-```
+```dockerfile
 docker run dualsphysics ./DualSPHysics4.2CPU_linux64
 ```
 This command works similar for the other executables, e.g.:
-```
+```dockerfile
 docker run dualsphysics ./GenCase4_linux64
 ```
 The Docker container runs a minimalized image of Ubuntu, thus only the `linux64` executables work.
 
 It is necessary to mount the working directory to the Docker container. Suppose you want to simulate a case defined in the file `/path/to/CaseDef.xml`. You have to execute the following commands:
 
-```
+```dockerfile
 # executes GenCase
 docker run -v /path/to:/run dualsphysics ./GenCase4_linux64 /run/CaseDef /run/out/Simulation -save:all
 

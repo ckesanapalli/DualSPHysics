@@ -70,7 +70,7 @@ void JMotionMovActive::DfReset(){
 }
 
 //==============================================================================
-// Configura datos del mov activo
+// Configure active mov data
 //==============================================================================
 void JMotionMovActive::ConfigData(){
   DfReset();
@@ -91,7 +91,7 @@ void JMotionMovActive::ConfigData(){
 }
 
 //==============================================================================
-// Carga y configura datos del movimiento a partir de fichero de datos.
+// Load and configure movement data from data file.
 //==============================================================================
 void JMotionMovActive::DfConfig(bool postype){
   const char met[]="DfConfig";
@@ -116,8 +116,8 @@ void JMotionMovActive::DfConfig(bool postype){
 }
 
 //==============================================================================
-// Devuelve posicion de times[] mas proxima por debajo de t o la ultima cuando
-// t es mayor que el ultimo valor.
+// Returns the position of times [] closest next to t or the last when
+// t is greater than the last value.
 //==============================================================================
 unsigned JMotionMovActive::BinarySearch(unsigned size,const double *times,double t){
   //unsigned n=0;
@@ -184,6 +184,7 @@ double JMotionMovActive::DfGetNewAng(double t){
 }
 
 //==============================================================================
+// Go to the next linked movement
 // Pasa al siguiente movimiento enlazado
 //==============================================================================
 void JMotionMovActive::NextMov(){
@@ -256,6 +257,7 @@ void JMotionObj::Reset(){
 }
 
 //==============================================================================
+// Return pointer to the object with the indicated id
 // Devuelve puntero al objeto con el id indicado
 //==============================================================================
 JMotionObj* JMotionObj::ObjGetPointer(unsigned id){
@@ -265,6 +267,7 @@ JMotionObj* JMotionObj::ObjGetPointer(unsigned id){
 }
 
 //==============================================================================
+// Return pointer to the object with the indicated reference
 // Devuelve puntero al objeto con la referencia indicada
 //==============================================================================
 JMotionObj* JMotionObj::ObjGetPointerByRef(int ref){
@@ -364,8 +367,8 @@ void JMotionObj::ResetTime(){
 }
 
 //==============================================================================
-// Calcula desplazamiento de objeto
-// Devuelve true si el objeto o alguno de sus hijos esta activo.
+// Calculate object displacement
+// Returns true if the object or one of its children is active.
 //==============================================================================
 bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsigned &lismovcount,JMotionObj** lisstop,unsigned &lisstopcount){
   //printf("ProcesTime-> %f %f  \n",timestep,dt);
@@ -374,7 +377,7 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
   Active=true;
   bool modif=false;
 
-  if(Parent&&Parent->Moving){//-Aplica movimiento del padre a todos los ejes
+  if(Parent&&Parent->Moving){//-Applies Parent movement to all axes
     //printf("ProcesTime-> Parent->Moving\n");
     int n=int(Axis.size());
     for(int c=0;c<n;c++)Parent->ModPos.PointsMove(Axis[c]->P1,Axis[c]->P2);
@@ -396,13 +399,13 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
 //ModPos.ToMatrix();
     for(int ca=0;ca<na;ca++){
       JMotionMovActive* amov=ActiveMovs[ca];
-      if(amov->Del){//-Elimina mov-activo marcado para borrar.
-//printf("*** Eliminacion de movimiento activo timestep: %G   dt: %G\n",timestep,dt);
+      if(amov->Del){//-Remove mov-active marked to erase.
+//printf("*** Elimination of active movement timestep: %G   dt: %G\n",timestep,dt);
         ActiveMovs.erase(ActiveMovs.begin()+ca);
         delete amov;
         ca--; na--;
       }
-      else{//-Procesa mov-activo.
+      else{//-Process mov-active.
         bool rep;
         double dt2=dt;
         double timestep2=timestep;
@@ -411,16 +414,16 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
           rep=false;
           JMotionMov* mov=amov->Mov;
 //printf("mstart: %G    mfinish: %G\n",amov->Start,amov->Finish);
-          //-Calcula dt ajustado al movimiento y el dt sobrante para el siguiente movimiento si lo hubiera.
+          //-Calculate dt adjusted to the movement and the remaining dt for the next movement if there was one.
           double dtmov=(tstepfin>amov->Finish? amov->Finish-timestep2: dt2);
           double dtover=dt2-dtmov;
 //printf("dtmov: %G    dtover: %G\n",dtmov,dtover);
-          //-Ajuste del dtmov por inicio de movimiento.
+          //-Adjustment of the dtmov by start of movement.
           if(timestep2<amov->Start){
             dtmov-=(amov->Start-timestep2);
-//printf("ReajusteDeInicio dtmov: %G     dtmov2: %G\n",-(amov->Start-timestep2),dtmov);
+//printf("ResetHome dtmov: %G     dtmov2: %G\n",-(amov->Start-timestep2),dtmov);
           }
-          //-Calcula movimiento.
+          //-Calculate movement.
           if(dtmov>0||amov->Flash)switch(mov->Type){
             case JMotionMov::Rectilinear:{
               const JMotionMovRect *mv=(JMotionMovRect*)mov;
@@ -481,11 +484,25 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
               const JMotionMovRectSinu *mv=(JMotionMovRectSinu*)mov;
               double t=(amov->Flash? -mv->Time: dtmov);
               tdouble3 ph=amov->Phase;
-              tdouble3 p1=TDouble3(0),p2=TDouble3(0);
-			  if(mv->Ampl.x){
-                p1.x=mv->Ampl.x*sin(ph.x); ph.x+=double(mv->Freq.x*TWOPI*t); p2.x=mv->Ampl.x*sin(ph.x);
-              }
-			  if(mv->Ampl.y){
+			  // printf("ph=amov->Phase : %f \n", ph);
+			  tdouble3 p1 = TDouble3(0), p2 = TDouble3(0);
+			  // Original Code ========================================================
+			  /* if(mv->Ampl.x){
+			  p1.x=mv->Ampl.x*sin(ph.x); ph.x+=double(mv->Freq.x*TWOPI*t); p2.x=mv->Ampl.x*sin(ph.x);
+			  } */
+			  // Original Code ========================================================
+			  // Modified Code ========================================================
+			  if (mv->Ampl.x) {
+				  p1.x = mv->Ampl.x*exp(mv->Freq.x*mv->Freq.x*TWOPI*TWOPI*amov->DfLastPos.z / 9.81)*sin(ph.x);
+				  // printf("mv->Freq.x, TWOPI, amov->DfLastPos.z = %f, %f, %f \n", mv->Freq.x, TWOPI, amov->DfLastPos.z);
+
+				  // printf("mv->Ampl.x, sin(ph.x) = %f - %f \n", mv->Ampl.x, sin(ph.x));
+				  
+				  ph.x += double(mv->Freq.x*TWOPI*t);
+				  p2.x = mv->Ampl.x*exp(mv->Freq.x*mv->Freq.x*TWOPI*TWOPI*amov->DfLastPos.z / 9.81)*sin(ph.x);
+			  }
+			  // Modified Code ========================================================
+			  if (mv->Ampl.y) {
                 p1.y=mv->Ampl.y*sin(ph.y); ph.y+=double(mv->Freq.y*TWOPI*t); p2.y=mv->Ampl.y*sin(ph.y);
               }
               if(mv->Ampl.z){
@@ -548,7 +565,8 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
               //printf(" PT>> t:%f ang:%f newang:%f\n",t,ang,newang);
             }break;
           }
-          //-Cambia al movimiento enlazado con el actual para terminar de consumir el dt.
+		  // - Change to the movement linked with the current one to finish consuming the dt.
+		  //-Cambia al movimiento enlazado con el actual para terminar de consumir el dt.
           if((dtover>0||dtmov==0)&&mov->NextMov!=NULL){
             amov->NextMov();
             dt2=dtover;
@@ -556,7 +574,7 @@ bool JMotionObj::ProcesTime(double timestep,double dt,JMotionObj** lismov,unsign
             if(timestep2<=amov->Finish||amov->Flash)rep=true;
           }
         }while(rep);
-        if(tstepfin>amov->Finish)amov->Del=true;//-Lo marca para que sea borrado en el siguiente ProcesTime().
+        if(tstepfin>amov->Finish)amov->Del=true;//-Mark it to be deleted in the next ProcesTime ().
       }
     }
   }

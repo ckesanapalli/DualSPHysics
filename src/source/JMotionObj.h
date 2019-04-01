@@ -44,21 +44,21 @@ public:
   const double EventFinish;
   double Start,Finish;
   bool Flash;
-  tdouble3 Vel;    //-Solo se usa para el RectilinearAce
-  double VelAng;   //-Solo se usa para el RotationAce
-  tdouble3 Phase;  //-Solo se usa para el RectilinearSinusoidal
-  double PhaseUni; //-Solo se usa para el RotationSinusoidal y CircularSinusoidal
+  tdouble3 Vel;    //-Only used for RectilinearAce
+  double VelAng;   //-Only used for the RotationAce
+  tdouble3 Phase;  //-Only used for RectilinearSinusoidal
+  double PhaseUni; //-Only used for RotationSinusoidal and CircularSinusoidal
 
-  //-Vars para el MovRectFile y MovRotFile
+  //-Vars for MovRectFile and MovRotFile
   static const unsigned DFSIZEMAX=104857600; ///<Maximum file size (100mb).
-  bool DfPosType;    //-Indica que se almacenan posiciones.
-  unsigned DfCount;  //-Numero de posiciones
-  unsigned DfIndex;  //-Indice de posicionamiento temporal
+  bool DfPosType;    //-Indicates that positions are stored.
+  unsigned DfCount;  //-Number of positions
+  unsigned DfIndex;  //-Index of temporary positioning
   tdouble3 DfLastPos;
   double DfLastAng;
-  const double *DfTimes;   //-Tiempos
-  const tdouble3 *DfPos;   //-Posiciones
-  const double *DfAng;     //-Angulos, siemgre en grados.
+  const double *DfTimes;   //-Time
+  const tdouble3 *DfPos;   //-Positions
+  const double *DfAng;     //-Angles, siemgre in degrees.
 
   JMotionMov* Mov;
   bool Del;
@@ -89,7 +89,7 @@ class JMotionEvent;
 class JMotionObj : protected JObject
 {
 private:
-  //JMotionPos Pos; //-Solo mantiene el desplazamiento acumulado cuando tiene hijos q puedan usarlo.
+  //JMotionPos Pos; //-Only keep the accumulated displacement when you have children who can use it.
   JMotionPos ModPos;
   bool Moving;
   std::vector<JMotionObj*> Children;  //-Objetos hijos.

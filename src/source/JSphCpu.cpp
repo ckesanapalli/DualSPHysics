@@ -1981,6 +1981,7 @@ void JSphCpu::MoveLinBound(unsigned np,unsigned ini,const tdouble3 &mvpos,const 
     if(pid!=UINT_MAX){
       UpdatePos(pos[pid],mvpos.x,mvpos.y,mvpos.z,false,pid,pos,dcell,code);
       velrhop[pid].x=mvvel.x;  velrhop[pid].y=mvvel.y;  velrhop[pid].z=mvvel.z;
+	  // printf("BAD: MOVELINBOUND is running \n");
     }
   }
 }
@@ -1989,7 +1990,7 @@ void JSphCpu::MoveLinBound(unsigned np,unsigned ini,const tdouble3 &mvpos,const 
 /// Applies a matrix movement to a group of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
-void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m,double dt
+void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
   ,const unsigned *ridpmv,tdouble3 *pos,unsigned *dcell,tfloat4 *velrhop,typecode *code)const
 {
   const unsigned fin=ini+np;
@@ -2002,9 +2003,79 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m,double dt
       const double dx=ps2.x-ps.x, dy=ps2.y-ps.y, dz=ps2.z-ps.z;
       UpdatePos(ps,dx,dy,dz,false,pid,pos,dcell,code);
       velrhop[pid].x=float(dx/dt);  velrhop[pid].y=float(dy/dt);  velrhop[pid].z=float(dz/dt);
+	  printf("BAD: MOVEMATBOUND is running \n");
     }
   }
 }
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+//==============================================================================
+// Chaitanya Kesanapalli Addition: Varying Boundary Condition
+//==============================================================================
+/// Applies a Varying movement to a group of particles.
+/// Aplica un movimiento matricial a un conjunto de particulas.
+//==============================================================================
+
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double timestep, double dt, const tdouble3 &mvpos, 
+	const tfloat3 &mvvel, const unsigned *ridp, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const
+{
+	const unsigned fin = ini + np;
+	for (unsigned id = ini; id<fin; id++) {
+		const unsigned pid = RidpMove[id];
+		if (pid != UINT_MAX) {
+			tdouble3 ps = pos[pid];
+			//===============================================================================
+			//===============================================================================
+			// Wave Equation 
+			// Chaitanya Kesanapalli addition
+			//===============================================================================
+			// Decaying sinusoidal motion
+			double omega = 2;
+			double wave_number = 3;
+			double Amplitude = 0.030;
+			tdouble3 waveveln__1 = TDouble3(0);
+			tdouble3 waveveln_0 = TDouble3(0);
+			tdouble3 waveveln_h = TDouble3(0);
+			tdouble3 waveveln_1 = TDouble3(0);
+			
+			waveveln__1.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep - dt) );
+			waveveln_0.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep));
+			waveveln_h.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep + dt/2.0));
+			waveveln_1.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep + dt));
+			// printf("Amplitude, omega, wave_number, ps.z, timestep %f, %f, %f, %f, %f \n", Amplitude, omega, wave_number, ps.z, timestep);
+
+			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
+			
+			/*printf("ChaitanyaK's displacment data: %f, %f, %f \n", dx, dy, dz);
+			printf("DualSPHysics displacment data: %f, %f, %f \n", mvpos.x, mvpos.y, mvpos.z);
+			printf("=============================================================\n");
+			printf("ChaitanyaK's n-1   Velocity data: %f %f %f \n", waveveln__1.x, waveveln__1.y, waveveln__1.z);
+			printf("ChaitanyaK's n     Velocity data: %f %f %f \n", waveveln_0.x, waveveln_0.y, waveveln_0.z);
+			printf("ChaitanyaK's n+0.5 Velocity data: %f %f %f \n", waveveln_h.x, waveveln_h.y, waveveln_h.z);
+			printf("ChaitanyaK's n+1   Velocity data: %f %f %f \n", waveveln_1.x, waveveln_1.y, waveveln_1.z);
+			printf("DualSPHysics       Velocity data: %f %f %f \n", mvvel.x, mvvel.y, mvvel.z);
+			printf("=============================================================\n");
+			*///===============================================================================
+			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
+			velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
+			
+			//===============================================================================
+			// old code (comment above and uncomment below to execute the old code)
+			// UpdatePos(pos[pid], mvpos.x, mvpos.y, mvpos.z, false, pid, pos, dcell, code);
+			// velrhop[pid].x = mvvel.x;  velrhop[pid].y = mvvel.y;  velrhop[pid].z = mvvel.z;
+			
+			// printf("BAD: MOVELINBOUND is running \n");
+		}
+	}
+}
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+
+
 
 //==============================================================================
 /// Calculates predefined movement of boundary particles.
@@ -2032,18 +2103,28 @@ void JSphCpu::RunMotion(double stepdt){
     BoundChanged=true;
     bool typesimple;
     tdouble3 simplemov,simplevel,simpleace;
+	// printf("First simplemov.x = %f \n", simplemov.x);
     tmatrix4d matmov,matmov2;
     unsigned nparts,idbegin;
     const unsigned nref=SphMotion->GetNumObjects();
     for(unsigned ref=0;ref<nref;ref++)if(SphMotion->ProcesTimeGetData(ref,typesimple,simplemov,simplevel,simpleace,matmov,matmov2,nparts,idbegin)){
+		// printf("Second simplemov.x = %f \n", simplemov.x);
       const unsigned pini=idbegin-CaseNfixed;
       if(typesimple){//-Simple movement. | Movimiento simple.
         if(Simulate2D)simplemov.y=simplevel.y=simpleace.y=0;
-        if(motsim)MoveLinBound   (nparts,pini,simplemov,ToTFloat3(simplevel),RidpMove,Posc,Dcellc,Velrhopc,Codec);
+		// =========================================================================================================
+		// Chaitanya Kesanapalli addition: Calling the MoveVaryBound function ======================================
+		if (motsim)MoveVaryBound(nparts, pini, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		// printf("Third simplemov.x = %f \n", simplemov.x);
+		// printf("=============================================================\n");
+		// =========================================================================================================
+		// =========================================================================================================
+		// if(motsim)MoveLinBound   (nparts,pini,simplemov,ToTFloat3(simplevel),RidpMove,Posc,Dcellc,Velrhopc,Codec);
         //else    MoveLinBoundAce(nparts,pini,simplemov,ToTFloat3(simplevel),ToTFloat3(simpleace),RidpMove,Posc,Dcellc,Velrhopc,Acec,Codec);
       }
       else{//-Movement using a matrix. | Movimiento con matriz.
-        if(motsim)MoveMatBound   (nparts,pini,matmov,stepdt,RidpMove,Posc,Dcellc,Velrhopc,Codec); 
+		  //if (motsim)MoveVaryBound(nparts, pini, matmov, TimeStep, stepdt, RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		  //if (motsim)MoveMatBound(nparts,pini,matmov,stepdt,RidpMove,Posc,Dcellc,Velrhopc,Codec); 
         //else    MoveMatBoundAce(nparts,pini,matmov,matmov2,stepdt,RidpMove,Posc,Dcellc,Velrhopc,Acec,Codec);
       }
     }
@@ -2066,7 +2147,8 @@ void JSphCpu::RunMotion(double stepdt){
       const unsigned np=nparts,pini=idbegin-CaseNfixed;
       if(typesimple){//-Simple movement. | Movimiento simple.
         if(Simulate2D)simplemov.y=simplevel.y=simpleace.y=0;
-        if(motsim)MoveLinBound   (np,pini,simplemov,ToTFloat3(simplevel),RidpMove,Posc,Dcellc,Velrhopc,Codec);    
+		if (motsim)MoveMatBound(np, pini, matmov, stepdt, RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		// if(motsim)MoveLinBound   (np,pini,simplemov,ToTFloat3(simplevel),RidpMove,Posc,Dcellc,Velrhopc,Codec);    
         //else    MoveLinBoundAce(np,pini,simplemov,ToTFloat3(simplevel),ToTFloat3(simpleace),RidpMove,Posc,Dcellc,Velrhopc,Acec,Codec);
       }
       else{

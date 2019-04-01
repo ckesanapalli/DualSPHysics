@@ -181,7 +181,9 @@ bool JMotionList::GetData(unsigned ref,bool &typesimple,tdouble3 &simplemov
   ,tdouble3 &simplevel,tdouble3 &simpleace,tmatrix4d &matmov,tmatrix4d &matmov2)const
 {
   if(ref>=Nref)RunException("GetData","Reference is invalid.");
-  return(MotionData[ref].GetData(typesimple,simplemov,simplevel,simpleace,matmov,matmov2));
+  const bool active = MotionData[ref].GetData(typesimple, simplemov, simplevel, simpleace, matmov, matmov2);
+  
+  return(active);
 }
 
 //==============================================================================

@@ -147,7 +147,7 @@ void JMotion::EventAdd(unsigned objid,unsigned movid,double timestart,double tim
 }
 
 //==============================================================================
-// Añade (si es necesario) un nuevo eje para un objeto y lo devuelve.
+// Add (if necessary) a new axis for an object and return it.
 //==============================================================================
 JMotionAxis* JMotion::AxisAdd(unsigned objid,const tdouble3 &p1,const tdouble3 &p2){
   const char met[]="AxisAdd";
@@ -323,7 +323,7 @@ void JMotion::Prepare(){
 }
 
 //==============================================================================
-// Crea y prepara objeto MotList.
+// Create and prepare MotList object.
 //==============================================================================
 void JMotion::CreateMotList(){
   const char met[]="CreateMotList";
@@ -347,16 +347,16 @@ void JMotion::CreateMotList(){
 }
 
 //==============================================================================
-// Sistema original de calculo pero guardando resultados en MotList igual que ProcesTimeAce().
-// Revisa lista de eventos para crear nuevos movimientos activos.
-// Devuelve true si hay movimientos activos.
+// Original calculation system but saving results in MotList like ProcesTimeAce ().
+// Review list of events to create new active movements.
+// Returns true if there are active movements.
 //==============================================================================
 bool JMotion::ProcesTimeSimple(double timestep,double dt){
   if(MotList==NULL)CreateMotList();
   MotList->PreMotion();
   bool movs=false;
   if(MotList->TimeStep>timestep)RunException("ProcesTimeSimple","The previous timestep+dt is higher than the requested timestep. It is invalid for simple mode.");
-  //-Procesa primer movimiento de dt.
+  //-Process first movement of dt.
   if(ProcesTime(timestep,dt)){
     movs=true;
     const unsigned nmove=GetMovCount();
@@ -421,7 +421,9 @@ bool JMotion::ProcesTimeAce(double timestep,double dt){
 bool JMotion::ProcesTimeGetData(unsigned ref,bool &typesimple,tdouble3 &simplemov
   ,tdouble3 &simplevel,tdouble3 &simpleace,tmatrix4d &matmov,tmatrix4d &matmov2)const
 {
-  return(MotList->GetData(ref,typesimple,simplemov,simplevel,simpleace,matmov,matmov2));
+	const bool active = MotList->GetData(ref, typesimple, simplemov, simplevel, simpleace, matmov, matmov2);
+	
+	return(active);
 }
 
 //==============================================================================
@@ -447,8 +449,8 @@ void JMotion::ResetTime(double timestep){
 }
 
 //==============================================================================
-// Revisa lista de eventos para crear nuevos movimientos activos.
-// Devuelve true si hay movimientos activos.
+// Review list of events to create new active movements.
+// Returns true if there are active movements.
 //==============================================================================
 bool JMotion::ProcesTime(double timestep,double dt){
   //printf("ProcesTime> timestep:%f dt:%f  \n",timestep,dt);
@@ -466,12 +468,15 @@ bool JMotion::ProcesTime(double timestep,double dt){
     }
     else looking=false;
   }
+
+  // - Calculate movement of each object and register objects in motion or just standing.
   //-Calcula movimiento de cada objeto y registra objetos en movimiento o recien parados.
   if(ObjsActive){
     ObjsActive=false;
     LisMovCount=0; LisStopCount=0;
     for(unsigned c=0;c<Objs.size();c++)if(Objs[c]->Active)ObjsActive|=Objs[c]->ProcesTime(timestep,dt,LisMov,LisMovCount,LisStop,LisStopCount);
   }
+  
   return(ObjsActive);//return((LisMovCount+LisStopCount)!=0);
 }
 

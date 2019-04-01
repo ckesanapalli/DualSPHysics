@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<case app="GenCase4 v4.0.074 (06-08-2018)" date="05-03-2019 23:11:53">
+<case app="GenCase4 v4.0.079 (16-10-2018)" date="29-03-2019 21:00:16">
     <casedef>
         <constantsdef>
             <lattice bound="1" fluid="1" />
@@ -17,9 +17,9 @@
             <mkorientfluid mk="0" orient="Xyz" />
         </mkconfig>
         <geometry>
-            <definition dp="0.02" units_comment="metres (m)">
-                <pointmin x="-0.1" y="-0.05" z="-0.05" />
-                <pointmax x="5.1" y="2.1" z="2" />
+            <definition dp="0.1" units_comment="metres (m)">
+                <pointmin x="-30" y="-30.1" z="-30" />
+                <pointmax x="30" y="30.1" z="30" />
             </definition>
             <commands>
                 <mainlist>
@@ -41,7 +41,7 @@
                     <setmkvoid />
                     <drawbox>
                         <boxfill>solid</boxfill>
-                        <point x="0" y="0" z="0.75" />
+                        <point x="0" y="0" z="0.7" />
                         <size x="5" y="2" z="1" />
                     </drawbox>
                     <setdrawmode mode="full" />
@@ -49,7 +49,7 @@
                     <drawbox>
                         <boxfill>solid</boxfill>
                         <point x="0" y="0" z="0" />
-                        <size x="0.06" y="2" z="1.5" />
+                        <size x="0.1" y="2" z="1.3" />
                     </drawbox>
                     <setmkbound mk="0" />
                     <drawprism mask="1 | 2 | 6 | 7">
@@ -74,7 +74,7 @@
                 <mvrectsinu id="1" duration="5" next="2" anglesunits="radians">
                     <freq x="0.5" y="0" z="0" />
                     <ampl x="0.25" y="0" z="0" />
-                    <phase x="4.71238898" y="0" z="0" />
+                    <phase x="20" y="0" z="0" />
                 </mvrectsinu>
                 <mvrectsinu id="2" duration="10" next="3">
                     <freq x="0.75" y="0" z="0" />
@@ -107,7 +107,7 @@
             <parameter key="#DtMin" value="0.00001" comment="Minimum time step (default=coefdtmin*h/speedsound)" units_comment="seconds" />
             <parameter key="#DtFixed" value="DtFixed.dat" comment="Dt values are loaded from file (default=disabled)" />
             <parameter key="DtAllParticles" value="1" comment="Velocity of particles used to calculate DT. 1:All, 0:Only fluid/floating (default=0)" />
-            <parameter key="TimeMax" value="10" comment="Time of simulation" units_comment="seconds" />
+            <parameter key="TimeMax" value="15" comment="Time of simulation" units_comment="seconds" />
             <parameter key="TimeOut" value="0.1" comment="Time out data" units_comment="seconds" />
             <parameter key="IncZ" value="0.5" comment="Increase of Z+" units_comment="decimal" />
             <parameter key="PartsOutMax" value="1" comment="%/100 of fluid particles allowed to be excluded from domain (default=1)" units_comment="decimal" />
@@ -115,26 +115,26 @@
             <parameter key="RhopOutMax" value="1300" comment="Maximum rhop valid (default=1300)" units_comment="kg/m^3" />
             <parameter key="YPeriodicIncZ" value="0.0" comment="Increase of Z with periodic BC" units_comment="metres (m)" />
         </parameters>
-        <particles np="463200" nb="61600" nbf="31600" mkboundfirst="11" mkfluidfirst="1">
+        <particles np="4284" nb="1890" nbf="1344" mkboundfirst="11" mkfluidfirst="1">
             <_summary>
-                <fixed count="31600" id="0-31599" mkcount="1" mkvalues="11" />
-                <moving count="30000" id="31600-61599" mkcount="1" mkvalues="21" />
-                <fluid count="401600" id="61600-463199" mkcount="1" mkvalues="1" />
+                <fixed count="1344" id="0-1343" mkcount="1" mkvalues="11" />
+                <moving count="546" id="1344-1889" mkcount="1" mkvalues="21" />
+                <fluid count="2394" id="1890-4283" mkcount="1" mkvalues="1" />
             </_summary>
-            <fixed mkbound="0" mk="11" begin="0" count="31600" />
-            <moving mkbound="10" mk="21" begin="31600" count="30000" refmotion="0" />
-            <fluid mkfluid="0" mk="1" begin="61600" count="401600" />
+            <fixed mkbound="0" mk="11" begin="0" count="1344" />
+            <moving mkbound="10" mk="21" begin="1344" count="546" refmotion="0" />
+            <fluid mkfluid="0" mk="1" begin="1890" count="2394" />
         </particles>
         <constants>
             <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
             <cflnumber value="0.2" />
             <gamma value="7" />
             <rhop0 value="1000" units_comment="kg/m^3" />
-            <dp value="0.02" units_comment="metres (m)" />
-            <h value="5.1961524227E-02" units_comment="metres (m)" />
-            <b value="3.9240000000E+05" units_comment="Pascal (Pa)" />
-            <massbound value="8.0000000000E-03" units_comment="kg" />
-            <massfluid value="8.0000000000E-03" units_comment="kg" />
+            <dp value="0.1" units_comment="metres (m)" />
+            <h value="2.5980762114E-01" units_comment="metres (m)" />
+            <b value="2.8028571429E+05" units_comment="Pascal (Pa)" />
+            <massbound value="1.0000000000E+00" units_comment="kg" />
+            <massfluid value="1.0000000000E+00" units_comment="kg" />
         </constants>
         <motion>
             <objreal ref="0">
@@ -142,7 +142,7 @@
                 <mvrectsinu id="1" duration="5" next="2" anglesunits="radians">
                     <freq x="0.5" y="0" z="0" units_comment="1/s" />
                     <ampl x="0.25" y="0" z="0" units_comment="metres (m)" />
-                    <phase x="4.71239" y="0" z="0" units_comment="radians" />
+                    <phase x="20" y="0" z="0" units_comment="radians" />
                 </mvrectsinu>
                 <mvrectsinu id="2" duration="10" next="3" anglesunits="degrees">
                     <freq x="0.75" y="0" z="0" units_comment="1/s" />

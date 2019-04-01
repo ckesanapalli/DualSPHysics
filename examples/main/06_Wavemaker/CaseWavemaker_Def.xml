@@ -17,9 +17,9 @@
             <mkorientfluid mk="0" orient="Xyz" />
         </mkconfig>
         <geometry>
-            <definition dp="0.02" units_comment="metres (m)">
-                <pointmin x="-0.1" y="-0.05" z="-0.05" />
-                <pointmax x="5.1" y="2.1" z="2" />
+            <definition dp="0.1" units_comment="metres (m)">
+                <pointmin x="-30" y="-30.1" z="-30" />
+                <pointmax x="30" y="30.1" z="30" />
             </definition>
             <commands>
                 <mainlist>
@@ -41,7 +41,7 @@
                     <setmkvoid />
                     <drawbox>
                         <boxfill>solid</boxfill>
-                        <point x="0" y="0" z="0.75" />
+                        <point x="0" y="0" z="0.7" />
                         <size x="5" y="2" z="1" />
                     </drawbox>
                     <setdrawmode mode="full" />
@@ -49,7 +49,7 @@
                     <drawbox>
                         <boxfill>solid</boxfill>
                         <point x="0" y="0" z="0" />
-                        <size x="0.06" y="2" z="1.5" />
+                        <size x="0.1" y="2" z="1.3" />
                     </drawbox>
                     <setmkbound mk="0" />
                     <drawprism mask="1 | 2 | 6 | 7">
@@ -74,7 +74,7 @@
                 <mvrectsinu id="1" duration="5" next="2" anglesunits="radians">
                     <freq x="0.5" y="0" z="0" />
                     <ampl x="0.25" y="0" z="0" />
-                    <phase x="4.71238898" y="0" z="0" />
+                    <phase x="20" y="0" z="0" />
                 </mvrectsinu>
                 <mvrectsinu id="2" duration="10" next="3">
                     <freq x="0.75" y="0" z="0" />
@@ -107,7 +107,7 @@
             <parameter key="#DtMin" value="0.00001" comment="Minimum time step (default=coefdtmin*h/speedsound)" units_comment="seconds" />
             <parameter key="#DtFixed" value="DtFixed.dat" comment="Dt values are loaded from file (default=disabled)" />
             <parameter key="DtAllParticles" value="1" comment="Velocity of particles used to calculate DT. 1:All, 0:Only fluid/floating (default=0)" />
-            <parameter key="TimeMax" value="10" comment="Time of simulation" units_comment="seconds" />
+            <parameter key="TimeMax" value="15" comment="Time of simulation" units_comment="seconds" />
             <parameter key="TimeOut" value="0.1" comment="Time out data" units_comment="seconds" />
             <parameter key="IncZ" value="0.5" comment="Increase of Z+" units_comment="decimal" />
             <parameter key="PartsOutMax" value="1" comment="%/100 of fluid particles allowed to be excluded from domain (default=1)" units_comment="decimal" />
