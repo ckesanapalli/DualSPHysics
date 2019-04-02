@@ -55,18 +55,18 @@ if not "%ERRORLEVEL%" == "0" goto fail
 %partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
 if not "%ERRORLEVEL%" == "0" goto fail
 
-set dirout2=%dirout%\measuretool
-mkdir %dirout2%
-%measuretool% -dirin %diroutdata% -points CaseWavemaker_PointsHeights.txt -onlytype:-all,+fluid -height -savevtk %dirout2%/PointsHeights -savecsv %dirout2%/_PointsHeight 
-if not "%ERRORLEVEL%" == "0" goto fail
+REM set dirout2=%dirout%\measuretool
+REM mkdir %dirout2%
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker_PointsHeights.txt -onlytype:-all,+fluid -height -savevtk %dirout2%/PointsHeights -savecsv %dirout2%/_PointsHeight 
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-%measuretool% -dirin %diroutdata% -points CaseWavemaker_wg0_3D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_WG0 
-if not "%ERRORLEVEL%" == "0" goto fail
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker_wg0_3D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_WG0 
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-set dirout2=%dirout%\surface
-mkdir %dirout2%
-%isosurface% -dirin %diroutdata% -saveiso %dirout2%/Surface 
-if not "%ERRORLEVEL%" == "0" goto fail
+REM set dirout2=%dirout%\surface
+REM mkdir %dirout2%
+REM %isosurface% -dirin %diroutdata% -saveiso %dirout2%/Surface 
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
 
 :success

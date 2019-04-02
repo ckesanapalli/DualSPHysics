@@ -2,7 +2,7 @@
 
 rem "name" and "dirout" are named according to the testcase
 
-set name=CaseWavemaker
+set name=CaseFloating
 set dirout=%name%_out
 set diroutdata=%dirout%\data
 
@@ -33,20 +33,15 @@ rem CODES are executed according the selected parameters of execution in this te
 %gencase% %name%_Def %dirout%/%name% -save:all
 if not "%ERRORLEVEL%" == "0" goto fail
 
-set dirout2=%dirout%\boundary
-mkdir %dirout2%
-%boundaryvtk% -loadvtk %dirout%/%name%__Actual.vtk -filexml %dirout%/%name%.xml -savevtkdata %dirout2%/MotionPREPiston -onlymk:21  
-if not "%ERRORLEVEL%" == "0" goto fail
-
 %dualsphysicscpu% -cpu %dirout%/%name% %dirout% -dirdataout data -svres
-if not "%ERRORLEVEL%" == "0" goto fail
-
-%boundaryvtk% -loadvtk %dirout%/%name%__Actual.vtk -filexml %dirout%/%name%.xml -motiondatatime %diroutdata% -savevtkdata %dirout2%/MotionPiston -onlymk:21 -savevtkdata %dirout2%/Box.vtk -onlymk:11
 if not "%ERRORLEVEL%" == "0" goto fail
 
 set dirout2=%dirout%\particles
 mkdir %dirout2%
-%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFLuid -onlytype:-all,+fluid
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFluid -onlytype:-all,+fluid 
+if not "%ERRORLEVEL%" == "0" goto fail
+
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFloating -onlytype:-all,+floating
 if not "%ERRORLEVEL%" == "0" goto fail
 
 %partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartPiston -onlytype:-all,+moving
@@ -55,12 +50,20 @@ if not "%ERRORLEVEL%" == "0" goto fail
 %partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
 if not "%ERRORLEVEL%" == "0" goto fail
 
-set dirout2=%dirout%\measuretool
+set dirout2=%dirout%\boundary
 mkdir %dirout2%
-%measuretool% -dirin %diroutdata% -points CaseWavemaker_PointsHeights.txt -onlytype:-all,+fluid -height -savevtk %dirout2%/PointsHeights -savecsv %dirout2%/_PointsHeight 
+%boundaryvtk% -loadvtk %dirout%/%name%__Dp.vtk -motiondata %diroutdata% -savevtkdata %dirout2%/Box.vtk -onlymk:31
 if not "%ERRORLEVEL%" == "0" goto fail
 
-%measuretool% -dirin %diroutdata% -points CaseWavemaker_wg0_3D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_WG0 
+%boundaryvtk% -loadvtk %dirout%/%name%__Dp.vtk -motiondata %diroutdata% -savevtkdata %dirout2%/MotionFloating -onlymk:61
+if not "%ERRORLEVEL%" == "0" goto fail
+
+%boundaryvtk% -loadvtk %dirout%/%name%__Dp.vtk -motiondata %diroutdata% -savevtkdata %dirout2%/MotionPiston -onlymk:21
+if not "%ERRORLEVEL%" == "0" goto fail
+
+set dirout2=%dirout%\floatinginfo
+mkdir %dirout2%
+%floatinginfo% -dirin %diroutdata% -onlymk:61 -savemotion -savedata %dirout2%/FloatingMotion 
 if not "%ERRORLEVEL%" == "0" goto fail
 
 set dirout2=%dirout%\surface

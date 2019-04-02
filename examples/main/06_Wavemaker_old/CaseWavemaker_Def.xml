@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<case app="GenCase4 v4.0.079 (16-10-2018)" date="29-03-2019 21:00:16">
+<case>
     <casedef>
         <constantsdef>
-            <lattice bound="1" fluid="1" />
+            <lattice bound="1" fluid="1" />			
             <gravity x="0" y="0" z="-9.81" comment="Gravitational acceleration" units_comment="m/s^2" />
             <rhop0 value="1000" comment="Reference density of the fluid" units_comment="kg/m^3" />
             <hswl value="0" auto="true" comment="Maximum still water level to calculate speedofsound using coefsound" units_comment="metres (m)" />
@@ -10,9 +10,9 @@
             <speedsystem value="0" auto="true" comment="Maximum system speed (by default the dam-break propagation is used)" />
             <coefsound value="20" comment="Coefficient to multiply speedsystem" />
             <speedsound value="0" auto="true" comment="Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)" />
-            <coefh value="1.5" comment="Coefficient to calculate the smoothing length (h=coefh*sqrt(3*dp^2) in 3D)" />
+            <coefh value="1.5" comment="Coefficient to calculate the smoothing length (h=coefh*sqrt(3*dp^2) in 3D)" />			
             <cflnumber value="0.2" comment="Coefficient to multiply dt" />
-        </constantsdef>
+		</constantsdef>	
         <mkconfig boundcount="230" fluidcount="10">
             <mkorientfluid mk="0" orient="Xyz" />
         </mkconfig>
@@ -89,12 +89,12 @@
     </casedef>
     <execution>
         <parameters>
-            <parameter key="PosDouble" value="1" comment="Precision in particle interaction 0:Simple, 1:Double, 2:Uses and saves double (default=0)" />
+            <parameter key="PosDouble" value="1" comment="Precision in particle interaction 0:Simple, 1:Double, 2:Uses and saves double (default=0)" />		
             <parameter key="StepAlgorithm" value="2" comment="Step Algorithm 1:Verlet, 2:Symplectic (default=1)" />
             <parameter key="VerletSteps" value="40" comment="Verlet only: Number of steps to apply Euler timestepping (default=40)" />
             <parameter key="Kernel" value="2" comment="Interaction Kernel 1:Cubic Spline, 2:Wendland (default=2)" />
             <parameter key="ViscoTreatment" value="1" comment="Viscosity formulation 1:Artificial, 2:Laminar+SPS (default=1)" />
-            <parameter key="Visco" value="0.02" comment="Viscosity value" />
+            <parameter key="Visco" value="0.02" comment="Viscosity value" /> % Note alpha can depend on the resolution. A value of 0.01 is recommended for near irrotational flows.
             <parameter key="ViscoBoundFactor" value="1" comment="Multiply viscosity value with boundary (default=1)" />
             <parameter key="DeltaSPH" value="0.1" comment="DeltaSPH value, 0.1 is the typical value, with 0 disabled (default=0)" />
             <parameter key="Shifting" value="1" comment="Shifting mode 0:None, 1:Ignore bound, 2:Ignore fixed, 3:Full (default=0)" />
@@ -115,48 +115,5 @@
             <parameter key="RhopOutMax" value="1300" comment="Maximum rhop valid (default=1300)" units_comment="kg/m^3" />
             <parameter key="YPeriodicIncZ" value="0.0" comment="Increase of Z with periodic BC" units_comment="metres (m)" />
         </parameters>
-        <particles np="4284" nb="1890" nbf="1344" mkboundfirst="11" mkfluidfirst="1">
-            <_summary>
-                <fixed count="1344" id="0-1343" mkcount="1" mkvalues="11" />
-                <moving count="546" id="1344-1889" mkcount="1" mkvalues="21" />
-                <fluid count="2394" id="1890-4283" mkcount="1" mkvalues="1" />
-            </_summary>
-            <fixed mkbound="0" mk="11" begin="0" count="1344" />
-            <moving mkbound="10" mk="21" begin="1344" count="546" refmotion="0" />
-            <fluid mkfluid="0" mk="1" begin="1890" count="2394" />
-        </particles>
-        <constants>
-            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
-            <cflnumber value="0.2" />
-            <gamma value="7" />
-            <rhop0 value="1000" units_comment="kg/m^3" />
-            <dp value="0.1" units_comment="metres (m)" />
-            <h value="2.5980762114E-01" units_comment="metres (m)" />
-            <b value="2.8028571429E+05" units_comment="Pascal (Pa)" />
-            <massbound value="1.0000000000E+00" units_comment="kg" />
-            <massfluid value="1.0000000000E+00" units_comment="kg" />
-        </constants>
-        <motion>
-            <objreal ref="0">
-                <begin mov="1" start="0" finish="100" />
-                <mvrectsinu id="1" duration="5" next="2" anglesunits="radians">
-                    <freq x="0.5" y="0" z="0" units_comment="1/s" />
-                    <ampl x="0.25" y="0" z="0" units_comment="metres (m)" />
-                    <phase x="20" y="0" z="0" units_comment="radians" />
-                </mvrectsinu>
-                <mvrectsinu id="2" duration="10" next="3" anglesunits="degrees">
-                    <freq x="0.75" y="0" z="0" units_comment="1/s" />
-                    <ampl x="0.25" y="0" z="0" units_comment="metres (m)" />
-                </mvrectsinu>
-                <mvrectsinu id="3" duration="10" next="2" anglesunits="degrees">
-                    <freq x="0.5" y="0" z="0" units_comment="1/s" />
-                    <ampl x="0.25" y="0" z="0" units_comment="metres (m)" />
-                </mvrectsinu>
-            </objreal>
-        </motion>
-        <vtkout mkboundfirst="11" mkfluidfirst="1">
-            <vtkfile name="CaseWavemaker__Dp.vtk" mk="11,21" mkbound="0,10" />
-            <vtkfile name="CaseWavemaker__Actual.vtk" mk="11,21" mkbound="0,10" />
-        </vtkout>
     </execution>
 </case>
