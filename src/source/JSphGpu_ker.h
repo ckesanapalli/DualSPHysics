@@ -156,6 +156,7 @@ void ComputeStepPos2(byte periactive,bool floatings,unsigned np,unsigned npb,con
 //-Kernels for Motion.
 void CalcRidp(bool periactive,unsigned np,unsigned pini,unsigned idini,unsigned idfin,const typecode *code,const unsigned *idp,unsigned *ridp);
 void MoveLinBound(byte periactive,unsigned np,unsigned ini,tdouble3 mvpos,tfloat3 mvvel,const unsigned *ridp,double2 *posxy,double *posz,unsigned *dcell,float4 *velrhop,typecode *code);
+void MoveVaryBound(byte periactive, bool simulate2d, unsigned np, unsigned ini, tmatrix4d m, double timestep, double dt, const unsigned *ridpmv, double2 *posxy, double *posz, unsigned *dcell, float4 *velrhop, typecode *code);
 void MoveMatBound(byte periactive,bool simulate2d,unsigned np,unsigned ini,tmatrix4d m,double dt,const unsigned *ridpmv,double2 *posxy,double *posz,unsigned *dcell,float4 *velrhop,typecode *code);
 
 //-Kernels for Floating bodies.

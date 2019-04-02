@@ -2041,7 +2041,7 @@ void MoveLinBound(byte periactive,unsigned np,unsigned ini,tdouble3 mvpos,tfloat
 
 
 //------------------------------------------------------------------------------
-/// Applies a linear movement to a set of particles.
+/// Applies a matricial movement to a set of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //------------------------------------------------------------------------------
 template<bool periactive,bool simulate2d> __global__ void KerMoveMatBound(unsigned n,unsigned ini,tmatrix4d m,double dt
@@ -2071,7 +2071,7 @@ template<bool periactive,bool simulate2d> __global__ void KerMoveMatBound(unsign
 }
 
 //==============================================================================
-/// Applies a linear movement to a set of particles.
+/// Applies a matricial movement to a set of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
 void MoveMatBound(byte periactive,bool simulate2d,unsigned np,unsigned ini,tmatrix4d m,double dt
@@ -2087,6 +2087,77 @@ void MoveMatBound(byte periactive,bool simulate2d,unsigned np,unsigned ini,tmatr
     else          KerMoveMatBound<peri,false> <<<sgrid,SPHBSIZE>>> (np,ini,m,dt,ridpmv,posxy,posz,dcell,velrhop,code);
   }
 }
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+//==============================================================================
+// Chaitanya Kesanapalli Addition: Varying Boundary Condition
+//==============================================================================
+/// Applies a Varying movement to a group of particles.
+/// Aplica un movimiento matricial a un conjunto de particulas.
+//==============================================================================
+
+template<bool periactive,bool simulate2d> __global__ void KerMoveVaryBound(unsigned n,unsigned ini,tmatrix4d m, 
+double timestep,double dt,const unsigned *ridpmv,double2 *posxy,double *posz,unsigned *dcell,float4 *velrhop,typecode *code)
+{
+  unsigned p=blockIdx.y*gridDim.x*blockDim.x + blockIdx.x*blockDim.x + threadIdx.x; //-Number of particle.
+  // ============================ Main change ============================
+  // ============================ Main change ============================
+  if(p<n){
+    int pid=ridpmv[p+ini];
+    if(pid>=0){
+      double2 rxy=posxy[pid];
+      double3 rpos=make_double3(rxy.x,rxy.y,posz[pid]);
+      //-Computes new position.
+      // double3 rpos2;
+	  // ============================ Main change ============================
+      double omega = TWOPI * 0.5;
+	  double wave_number = 2.0;
+	  double Amplitude = 0.25;
+	  double3 wavevel;
+	  wavevel.x = Amplitude * omega * exp(wave_number* rpos.z)* cos(omega* timestep);
+      wavevel.y= 0.0;
+      wavevel.z= 0.0;
+
+	  //-Computes displacement and updates position.
+      const double dx=wavevel.x * dt;
+      const double dy=wavevel.y * dt;
+      const double dz=wavevel.z * dt;
+     
+      if(simulate2d)wavevel.y=0.0;
+       KerUpdatePos<periactive>(make_double2(rpos.x,rpos.y),rpos.z,dx,dy,dz,false,pid,posxy,posz,dcell,code);
+      
+	  //-Computes velocity.
+      velrhop[pid]=make_float4(float(wavevel.x),float(wavevel.y),float(wavevel.z),velrhop[pid].w);
+	  
+	  // ============================ Main change ============================
+	  
+    }
+  }
+}
+
+//==============================================================================
+/// Applies a matricial movement to a set of particles.
+/// Aplica un movimiento matricial a un conjunto de particulas.
+//==============================================================================
+void MoveVaryBound(byte periactive,bool simulate2d,unsigned np,unsigned ini,tmatrix4d m,double timestep,double dt
+  ,const unsigned *ridpmv,double2 *posxy,double *posz,unsigned *dcell,float4 *velrhop,typecode *code)
+{
+  dim3 sgrid=GetGridSize(np,SPHBSIZE);
+  if(periactive){ const bool peri=true;
+    if(simulate2d)KerMoveVaryBound<peri,true>  <<<sgrid,SPHBSIZE>>> (np,ini,m,timestep,dt,ridpmv,posxy,posz,dcell,velrhop,code);
+    else          KerMoveVaryBound<peri,false> <<<sgrid,SPHBSIZE>>> (np,ini,m,timestep,dt,ridpmv,posxy,posz,dcell,velrhop,code);
+  }
+  else{ const bool peri=false;
+    if(simulate2d)KerMoveVaryBound<peri,true>  <<<sgrid,SPHBSIZE>>> (np,ini,m,timestep,dt,ridpmv,posxy,posz,dcell,velrhop,code);
+    else          KerMoveVaryBound<peri,false> <<<sgrid,SPHBSIZE>>> (np,ini,m,timestep,dt,ridpmv,posxy,posz,dcell,velrhop,code);
+  }
+}
+//==============================================================================
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
 
 
 //##############################################################################
