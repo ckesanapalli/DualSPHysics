@@ -3,7 +3,7 @@
 rem "name" and "dirout" are named according to the testcase
 
 set name=CaseWavemaker2D
-set dirout=%name%_original_out
+set dirout=%name%_CPU_original_out
 set diroutdata=%dirout%\data
 
 rem "executables" are renamed and called from their directory
@@ -11,7 +11,7 @@ rem "executables" are renamed and called from their directory
 set dirbin=../../../bin/windows
 set gencase="%dirbin%/GenCase4_win64.exe"
 set dualsphysicscpu="%dirbin%/DualSPHysics4.2CPU_original_win64.exe"
-set dualsphysicsgpu="%dirbin%/DualSPHysics4.2_win64.exe"
+set dualsphysicsgpu="%dirbin%/DualSPHysics4.2_original_win64.exe"
 set boundaryvtk="%dirbin%/BoundaryVTK4_win64.exe"
 set partvtk="%dirbin%/PartVTK4_win64.exe"
 set partvtkout="%dirbin%/PartVTKOut4_win64.exe"

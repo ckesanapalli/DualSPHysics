@@ -3,15 +3,15 @@
 rem "name" and "dirout" are named according to the testcase
 
 set name=CaseWavemaker2D
-set dirout=%name%_CPU_out
+set dirout=%name%_GPU_original_out
 set diroutdata=%dirout%\data
 
 rem "executables" are renamed and called from their directory
 
 set dirbin=../../../bin/windows
 set gencase="%dirbin%/GenCase4_win64.exe"
-set dualsphysicscpu="%dirbin%/DualSPHysics4.2CPU_win64.exe"
-set dualsphysicsgpu="%dirbin%/DualSPHysics4.2_win64.exe"
+set dualsphysicscpu="%dirbin%/DualSPHysics4.2CPU_original_win64.exe"
+set dualsphysicsgpu="%dirbin%/DualSPHysics4.2_original_win64.exe"
 set boundaryvtk="%dirbin%/BoundaryVTK4_win64.exe"
 set partvtk="%dirbin%/PartVTK4_win64.exe"
 set partvtkout="%dirbin%/PartVTKOut4_win64.exe"
@@ -37,7 +37,7 @@ rem CODES are executed according the selected parameters of execution in this te
 %gencase% %name%_Def %dirout%/%name% -save:all
 if not "%ERRORLEVEL%" == "0" goto fail
 
-%dualsphysicscpu% -cpu %dirout%/%name% %dirout% -dirdataout data -svres
+%dualsphysicsgpu% -gpu %dirout%/%name% %dirout% -dirdataout data -svres
 if not "%ERRORLEVEL%" == "0" goto fail
 
 set dirout2=%dirout%\particles

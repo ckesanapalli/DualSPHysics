@@ -2017,7 +2017,8 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
 
-void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double timestep, double dt, const tdouble3 &mvpos, 
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, 
+	double omega, double wave_number, double Amplitude, double timestep, double dt, const tdouble3 &mvpos,
 	const tfloat3 &mvvel, const unsigned *ridp, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const
 {
 	const unsigned fin = ini + np;
@@ -2031,32 +2032,11 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double timestep, double d
 			// Chaitanya Kesanapalli addition
 			//===============================================================================
 			// Decaying sinusoidal motion
-			double omega = 2;
-			double wave_number = 3;
-			double Amplitude = 0.030;
-			tdouble3 waveveln__1 = TDouble3(0);
-			tdouble3 waveveln_0 = TDouble3(0);
 			tdouble3 waveveln_h = TDouble3(0);
-			tdouble3 waveveln_1 = TDouble3(0);
 			
-			waveveln__1.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep - dt) );
-			waveveln_0.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep));
 			waveveln_h.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep + dt/2.0));
-			waveveln_1.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep + dt));
-			// printf("Amplitude, omega, wave_number, ps.z, timestep %f, %f, %f, %f, %f \n", Amplitude, omega, wave_number, ps.z, timestep);
-
 			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
 			
-			/*printf("ChaitanyaK's displacment data: %f, %f, %f \n", dx, dy, dz);
-			printf("DualSPHysics displacment data: %f, %f, %f \n", mvpos.x, mvpos.y, mvpos.z);
-			printf("=============================================================\n");
-			printf("ChaitanyaK's n-1   Velocity data: %f %f %f \n", waveveln__1.x, waveveln__1.y, waveveln__1.z);
-			printf("ChaitanyaK's n     Velocity data: %f %f %f \n", waveveln_0.x, waveveln_0.y, waveveln_0.z);
-			printf("ChaitanyaK's n+0.5 Velocity data: %f %f %f \n", waveveln_h.x, waveveln_h.y, waveveln_h.z);
-			printf("ChaitanyaK's n+1   Velocity data: %f %f %f \n", waveveln_1.x, waveveln_1.y, waveveln_1.z);
-			printf("DualSPHysics       Velocity data: %f %f %f \n", mvvel.x, mvvel.y, mvvel.z);
-			printf("=============================================================\n");
-			*///===============================================================================
 			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
 			velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
 			
@@ -2114,7 +2094,11 @@ void JSphCpu::RunMotion(double stepdt){
         if(Simulate2D)simplemov.y=simplevel.y=simpleace.y=0;
 		// =========================================================================================================
 		// Chaitanya Kesanapalli addition: Calling the MoveVaryBound function ======================================
-		if (motsim)MoveVaryBound(nparts, pini, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		double omega = 2.0;
+		double wave_number = 3.0;
+		double Amplitude = 0.030;
+
+		if (motsim)MoveVaryBound(nparts, pini, omega, wave_number, Amplitude, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
 		// printf("Third simplemov.x = %f \n", simplemov.x);
 		// printf("=============================================================\n");
 		// =========================================================================================================

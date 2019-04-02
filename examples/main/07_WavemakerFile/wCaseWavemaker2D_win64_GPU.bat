@@ -3,7 +3,7 @@
 rem "name" and "dirout" are named according to the testcase
 
 set name=CaseWavemaker2D
-set dirout=%name%_out
+set dirout=%name%_GPU_out
 set diroutdata=%dirout%\data
 
 rem "executables" are renamed and called from their directory
@@ -48,24 +48,27 @@ if not "%ERRORLEVEL%" == "0" goto fail
 %partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartMoving -onlytype:-all,+moving
 if not "%ERRORLEVEL%" == "0" goto fail
 
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartBox -onlytype:-all,+fixed
+if not "%ERRORLEVEL%" == "0" goto fail
+
 %partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
 if not "%ERRORLEVEL%" == "0" goto fail
 
-set dirout2=%dirout%\measuretool
-mkdir %dirout2%
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg1_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg1 -savevtk %dirout2%/wg1
-if not "%ERRORLEVEL%" == "0" goto fail
+REM set dirout2=%dirout%\measuretool
+REM mkdir %dirout2%
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg1_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg1 -savevtk %dirout2%/wg1
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg2_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg2 -savevtk %dirout2%/wg2
-if not "%ERRORLEVEL%" == "0" goto fail
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg2_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg2 -savevtk %dirout2%/wg2
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg3_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg3 -savevtk %dirout2%/wg3
-if not "%ERRORLEVEL%" == "0" goto fail
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg3_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg3 -savevtk %dirout2%/wg3
+REM if not "%ERRORLEVEL%" == "0" goto fail
  
-set dirout2=%dirout%\forces
-mkdir %dirout2%
-%computeforces% -dirin %diroutdata% -onlyid:1616-1669 -savecsv %dirout2%/WallForce -savevtk %dirout2%/_WallForce
-if not "%ERRORLEVEL%" == "0" goto fail
+REM set dirout2=%dirout%\forces
+REM mkdir %dirout2%
+REM %computeforces% -dirin %diroutdata% -onlyid:1616-1669 -savecsv %dirout2%/_WallForce -savevtk %dirout2%/WallForce
+REM if not "%ERRORLEVEL%" == "0" goto fail
 rem Note that initial hydrostatic force is 20.72 N (initial column water 0.065 high) 
 
 
