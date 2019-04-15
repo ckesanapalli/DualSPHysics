@@ -1017,7 +1017,7 @@ void JSphGpu::RunMotion(double stepdt){
       const unsigned pini=idbegin-CaseNfixed;
       if(typesimple){//-Simple movement. | Movimiento simple.
         if(Simulate2D)simplemov.y=simplevel.y=simpleace.y=0;
-
+		// Chaitanya Kesanapalli addition: Varying Motion of the piston
 		if (motsim)cusph::MoveVaryBound(PeriActive, Simulate2D, nparts, pini, matmov, TimeStep, stepdt, RidpMoveg, Posxyg, Poszg, Dcellg, Velrhopg, Codeg);
 		//if(motsim)cusph::MoveLinBound(PeriActive,nparts,pini,simplemov,ToTFloat3(simplevel),RidpMoveg,Posxyg,Poszg,Dcellg,Velrhopg,Codeg);
         //else    cusph::MoveLinBoundAce(PeriActive,nparts,pini,simplemov,ToTFloat3(simplevel),ToTFloat3(simpleace),RidpMoveg,Posxyg,Poszg,Dcellg,Velrhopg,Codeg);

@@ -246,7 +246,7 @@ protected:
   // Chaitanya Kesanapalli Addition: Varying Boundary Condition
   //===========================================================================================================
   // void MoveVaryBound(unsigned np, unsigned ini, tmatrix4d m, double timestep, double dt, const unsigned *ridpmv, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const;
-  void MoveVaryBound(unsigned np, unsigned ini, double omega, double wave_number, double Amplitude, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+  void MoveVaryBound(unsigned np, unsigned ini, double pistonamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
   //===========================================================================================================
   //***********************************************************************************************************
   //***********************************************************************************************************

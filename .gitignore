@@ -11,6 +11,8 @@ examples/main/06_Wavemaker_old/CaseWavemaker*out*
 examples/main/06_Wavemaker/CaseWavemaker*out*
 examples/main/06_Wavemaker2D/CaseWavemaker*out*
 examples/main/07_WavemakerFile/CaseWavemaker2D*out*
+examples/main-GPU
+examples/main
 
 ## Ignores other directories.
 __Tools__
@@ -21,3 +23,11 @@ _out_CompileLinux
 bin/windows/*.iobj
 bin/windows/*.ipdb
 backup
+examples/main-GPU/02_Shipsail/.vs/02_Shipsail/v15/.suo
+*.bi4
+*.vtk
+*.csv
+*.out
+*.ibi4
+*.obi4
+*.sh

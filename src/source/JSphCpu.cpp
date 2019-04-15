@@ -2016,11 +2016,9 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
 /// Applies a Varying movement to a group of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
-
-void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, 
-	double omega, double wave_number, double Amplitude, double timestep, double dt, const tdouble3 &mvpos,
-	const tfloat3 &mvvel, const unsigned *ridp, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const
-{
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wave_number, double omega, double waterdepth,
+	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
+	tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const{
 	const unsigned fin = ini + np;
 	for (unsigned id = ini; id<fin; id++) {
 		const unsigned pid = RidpMove[id];
@@ -2033,8 +2031,20 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini,
 			//===============================================================================
 			// Decaying sinusoidal motion
 			tdouble3 waveveln_h = TDouble3(0);
-			
-			waveveln_h.x = Amplitude* omega* exp(wave_number* ps.z)* cos(omega* (timestep + dt/2.0));
+			double velamp = waveamp* omega / sinh(wave_number * waterdepth);
+			double phase = wave_number * ps.x - omega * timestep;
+			double hphase = wave_number * (ps.z + waterdepth);
+			if (ps.z >= 0) {
+				hphase = wave_number * waterdepth;
+			}
+
+			waveveln_h.x = velamp* cosh(hphase)* cos(phase);
+			waveveln_h.z = velamp* sinh(hphase)* sin(phase);
+
+			// Deep Water condition
+			// waveveln_h.x = waveamp* omega* exp(wave_number * ps.z)* cos(omega* (timestep));
+			// waveveln_h.z = waveamp* omega* exp(wave_number * ps.z)* sin(omega* (timestep));
+
 			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
 			
 			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
@@ -2093,12 +2103,41 @@ void JSphCpu::RunMotion(double stepdt){
       if(typesimple){//-Simple movement. | Movimiento simple.
         if(Simulate2D)simplemov.y=simplevel.y=simpleace.y=0;
 		// =========================================================================================================
+		// =========================================================================================================
+		// =========================================================================================================
 		// Chaitanya Kesanapalli addition: Calling the MoveVaryBound function ======================================
-		double omega = 2.0;
-		double wave_number = 3.0;
-		double Amplitude = 0.030;
+		// Wave parameters
+		// Parameters are taken from the paper T. Verbrugghe et al. 2018
 
-		if (motsim)MoveVaryBound(nparts, pini, omega, wave_number, Amplitude, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		const double waveheight = 0.02; // waveheight
+		const double waveperiod = 1.5; // waveperiod
+		const double waterdepth = 1.0; // waterdepth
+		const double wavelength = 3.35; // wavelength
+
+		const double omega = TWOPI / waveperiod; // angular frequency of the piston
+		const double waveamp = waveheight / 2.0; // Amplitude 
+		const double wavenumber = TWOPI / wavelength; // Wave Number
+
+
+		//Callculation of the wave number
+		//double temp = 1;
+		//double wave_number = 0.1; // Wave number of the wave
+		//while (abs(wave_number - temp) > 1e-5) {
+		//	temp = wave_number;
+		//	wave_number = omega*omega / (-Gravity.z* tanh(wave_number * depth));
+		//}
+		//// Calculation of the Piston amplitude
+		//const double kd = wave_number * depth;
+		//double HbyS = (2 * sinh(kd) * sinh(kd)) / (sinh(kd)* cosh(kd) + kd);
+		//const double pistonamp = waveamp / HbyS;
+
+
+
+		if (motsim)MoveVaryBound(nparts, pini, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		// =========================================================================================================
+		// =========================================================================================================
+		// =========================================================================================================
+		// =========================================================================================================
 		// printf("Third simplemov.x = %f \n", simplemov.x);
 		// printf("=============================================================\n");
 		// =========================================================================================================
