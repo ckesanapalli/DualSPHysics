@@ -103,6 +103,9 @@ void JSphCpuSingle::ConfigDomain(){
   //-Copies particle data.
   ReserveBasicArraysCpu();
   memcpy(Posc,PartsLoaded->GetPos(),sizeof(tdouble3)*Np);
+
+  if (TimeStep = 0.0)memset(Posc0, 0, sizeof(tdouble3)*Np); // Chaitanya Kesanapalli
+
   memcpy(Idpc,PartsLoaded->GetIdp(),sizeof(unsigned)*Np);
   memcpy(Velrhopc,PartsLoaded->GetVelRhop(),sizeof(tfloat4)*Np);
 
@@ -143,6 +146,7 @@ void JSphCpuSingle::ConfigDomain(){
   //-Reordena particulas por celda.
   BoundChanged=true;
   RunCellDivide(true);
+
 }
 
 //==============================================================================
@@ -399,6 +403,7 @@ void JSphCpuSingle::RunCellDivide(bool updateperiodic){
   CellDivSingle->SortArray(Codec);
   CellDivSingle->SortArray(Dcellc);
   CellDivSingle->SortArray(Posc);
+  CellDivSingle->SortArray(Posc0); // Chaitanya Kesanapalli
   CellDivSingle->SortArray(Velrhopc);
   if(TStep==STEP_Verlet){
     CellDivSingle->SortArray(VelrhopM1c);

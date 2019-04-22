@@ -69,6 +69,7 @@ void JSphCpu::InitVars(){
   NpbPer=NpfPer=0;
 
   Idpc=NULL; Codec=NULL; Dcellc=NULL; Posc=NULL; Velrhopc=NULL;
+  Posc0 = NULL; // Chaitanya Kesanapalli
   VelrhopM1c=NULL;                //-Verlet
   PosPrec=NULL; VelrhopPrec=NULL; //-Symplectic
   PsPosc=NULL;                    //-Interaccion Pos-Single.
@@ -82,6 +83,7 @@ void JSphCpu::InitVars(){
   FtoForcesRes=NULL;
   FreeCpuMemoryParticles();
   FreeCpuMemoryFixed();
+  
 }
 
 //==============================================================================
@@ -150,6 +152,12 @@ void JSphCpu::AllocCpuMemoryParticles(unsigned np,float over){
   ArraysCpu->AddArrayCount(JArraysCpu::SIZE_12B,1); //-ace
   ArraysCpu->AddArrayCount(JArraysCpu::SIZE_16B,1); //-velrhop
   ArraysCpu->AddArrayCount(JArraysCpu::SIZE_24B,2); //-pos
+//==============================================================================
+//==============================================================================
+// Chaitanya Kesanapalli
+  ArraysCpu->AddArrayCount(JArraysCpu::SIZE_24B, 2); //-pos0
+//==============================================================================
+//==============================================================================
   if(Psingle)ArraysCpu->AddArrayCount(JArraysCpu::SIZE_12B,1); //-pspos
   if(TStep==STEP_Verlet){
     ArraysCpu->AddArrayCount(JArraysCpu::SIZE_16B,1); //-velrhopm1
@@ -179,6 +187,7 @@ void JSphCpu::ResizeCpuMemoryParticles(unsigned npnew){
   typecode    *code      =SaveArrayCpu(Np,Codec);
   unsigned    *dcell     =SaveArrayCpu(Np,Dcellc);
   tdouble3    *pos       =SaveArrayCpu(Np,Posc);
+  //tdouble3    *pos0 = SaveArrayCpu(Np, Posc0); // Chaitanya Kesanapalli
   tfloat4     *velrhop   =SaveArrayCpu(Np,Velrhopc);
   tfloat4     *velrhopm1 =SaveArrayCpu(Np,VelrhopM1c);
   tdouble3    *pospre    =SaveArrayCpu(Np,PosPrec);
@@ -189,6 +198,7 @@ void JSphCpu::ResizeCpuMemoryParticles(unsigned npnew){
   ArraysCpu->Free(Codec);
   ArraysCpu->Free(Dcellc);
   ArraysCpu->Free(Posc);
+  //ArraysCpu->Free(Posc0); // Chaitanya Kesanapalli
   ArraysCpu->Free(Velrhopc);
   ArraysCpu->Free(VelrhopM1c);
   ArraysCpu->Free(PosPrec);
@@ -203,6 +213,7 @@ void JSphCpu::ResizeCpuMemoryParticles(unsigned npnew){
   Codec   =ArraysCpu->ReserveTypeCode();
   Dcellc  =ArraysCpu->ReserveUint();
   Posc    =ArraysCpu->ReserveDouble3();
+  //Posc0 = ArraysCpu->ReserveDouble3(); // Chaitanya Kesanapalli
   Velrhopc=ArraysCpu->ReserveFloat4();
   if(velrhopm1) VelrhopM1c =ArraysCpu->ReserveFloat4();
   if(pospre)    PosPrec    =ArraysCpu->ReserveDouble3();
@@ -213,6 +224,7 @@ void JSphCpu::ResizeCpuMemoryParticles(unsigned npnew){
   RestoreArrayCpu(Np,code,Codec);
   RestoreArrayCpu(Np,dcell,Dcellc);
   RestoreArrayCpu(Np,pos,Posc);
+  //RestoreArrayCpu(Np, pos, Posc0); // Chaitanya Kesanapalli
   RestoreArrayCpu(Np,velrhop,Velrhopc);
   RestoreArrayCpu(Np,velrhopm1,VelrhopM1c);
   RestoreArrayCpu(Np,pospre,PosPrec);
@@ -257,6 +269,14 @@ void JSphCpu::ReserveBasicArraysCpu(){
   Codec=ArraysCpu->ReserveTypeCode();
   Dcellc=ArraysCpu->ReserveUint();
   Posc=ArraysCpu->ReserveDouble3();
+  //==============================================================================
+  //==============================================================================
+  // Chaitanya Kesanapalli
+  Posc0 = ArraysCpu->ReserveDouble3(); // Initial Particle Position
+  //==============================================================================
+  //==============================================================================
+
+
   Velrhopc=ArraysCpu->ReserveFloat4();
   if(TStep==STEP_Verlet)VelrhopM1c=ArraysCpu->ReserveFloat4();
   if(TVisco==VISCO_LaminarSPS)SpsTauc=ArraysCpu->ReserveSymatrix3f();
@@ -302,6 +322,7 @@ unsigned JSphCpu::GetParticlesData(unsigned n,unsigned pini,bool onlynormal
   if(code)memcpy(code,Codec+pini,sizeof(typecode)*n);
   if(idp)memcpy(idp,Idpc+pini,sizeof(unsigned)*n);
   if(pos)memcpy(pos,Posc+pini,sizeof(tdouble3)*n);
+  //if (pos)memcpy(pos, Posc0 + pini, sizeof(tdouble3)*n); // Chaitanya Kesanapalli
   if(vel && rhop){
     for(unsigned p=0;p<n;p++){
       tfloat4 vr=Velrhopc[p+pini];
@@ -392,7 +413,7 @@ void JSphCpu::ConfigRunMode(const JCfgRun *cfg,std::string preinfo){
 //==============================================================================
 void JSphCpu::InitRunCpu(){
   InitRun(Np,Idpc,Posc);
-
+  if (TimeStep = 0.0)memset(Posc0, 0, sizeof(tdouble3)*Np); // Chaitanya Kesanapalli
   if(TStep==STEP_Verlet)memcpy(VelrhopM1c,Velrhopc,sizeof(tfloat4)*Np);
   if(TVisco==VISCO_LaminarSPS)memset(SpsTauc,0,sizeof(tsymatrix3f)*Np);
   if(CaseNfloat)InitFloating();
@@ -2016,10 +2037,23 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
 /// Applies a Varying movement to a group of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
-void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wave_number, double omega, double waterdepth,
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double wave_number, double omega, double waterdepth,
 	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
 	tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const{
 	const unsigned fin = ini + np;
+	/*const unsigned sizenp = np;
+	double pos0x[INT_MAX] = {};
+	double pos0y[INT_MAX] = {};
+	double pos0z[INT_MAX] = {};*/
+
+	/*double* pos0x = new double[np];
+	double* pos0y = new double[np];
+	double* pos0z = new double[np];*/
+
+
+
+	//printf(" \n np, ini, pos.x, pos.z, *code : %d %d %d \n", np, ini, *code);
+
 	for (unsigned id = ini; id<fin; id++) {
 		const unsigned pid = RidpMove[id];
 		if (pid != UINT_MAX) {
@@ -2029,17 +2063,25 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wa
 			// Wave Equation 
 			// Chaitanya Kesanapalli addition
 			//===============================================================================
-			// Decaying sinusoidal motion
-			tdouble3 waveveln_h = TDouble3(0);
-			double velamp = waveamp* omega / sinh(wave_number * waterdepth);
-			double phase = wave_number * ps.x - omega * timestep;
-			double hphase = wave_number * (ps.z + waterdepth);
-			if (ps.z >= 0) {
-				hphase = wave_number * waterdepth;
+			 //decaying sinusoidal motion
+			if (timestep == 0.0) {
+				
+				pos0[pid] = ps;
+				//printf("\n pos0[%d].x, pos0[%d].y, pos0[%d].z = %f, %f, %f \n", pid, pid, pid, pos0[pid].x, pos0[pid].y, pos0[pid].z);
+				
 			}
-
-			waveveln_h.x = velamp* cosh(hphase)* cos(phase);
-			waveveln_h.z = velamp* sinh(hphase)* sin(phase);
+			//printf("\n pos0[0][190], pos0[1][190], pos0[2][190] = %f, %f, %f \n", pos0[0][190], pos0[1][190], pos0[2][190]);
+			tdouble3 waveveln_h = TDouble3(0);
+			double kd = wave_number * waterdepth;
+			double kz = wave_number * pos0[pid].z;
+			if (pos0[pid].z >= 0) kz = 0.0;
+			
+			double velamp = waveamp* omega * exp(kz) / (1 - exp(-2 * kd));
+			double phase = wave_number * pos0[pid].x - omega * timestep;
+			
+			waveveln_h.x = velamp* (1 + exp(-2 * (kd + kz)))* cos(phase);
+			waveveln_h.y = 0.0;
+			waveveln_h.z = velamp* (1 - exp(-2 * (kd + kz)))* sin(phase);
 
 			// Deep Water condition
 			// waveveln_h.x = waveamp* omega* exp(wave_number * ps.z)* cos(omega* (timestep));
@@ -2088,6 +2130,16 @@ void JSphCpu::RunMotion(double stepdt){
   TmcStart(Timers,TMC_SuMotion);
   const bool motsim=true;
   BoundChanged=false;
+  //==============================================================================
+  //==============================================================================
+  // Chaitanya Kesanapalli
+  //std::vector<std::vector<double>> pos0(3, std::vector<double>(9000, 0));
+  //if (TimeStep = 0.0) double pos0[3][9000] = { 1 };
+  //double (*pos0c)[3][9000] = &pos0;
+  //printf("\n Initializing the Initial Position and the timestep is %f\n", TimeStep);
+//==============================================================================
+//==============================================================================
+  
   if(SphMotion->GetActiveMotion()){
     CalcRidp(PeriActive!=0,Npb,0,CaseNfixed,CaseNfixed+CaseNmoving,Codec,Idpc,RidpMove);
     BoundChanged=true;
@@ -2109,23 +2161,20 @@ void JSphCpu::RunMotion(double stepdt){
 		// Wave parameters
 		// Parameters are taken from the paper T. Verbrugghe et al. 2018
 
-		const double waveheight = 0.02; // waveheight
+		const double waveheight = 0.1; // waveheight
 		const double waveperiod = 1.5; // waveperiod
-		const double waterdepth = 1.0; // waterdepth
-		const double wavelength = 3.35; // wavelength
-
+		const double waterdepth = 1000.0; // waterdepth
+		
 		const double omega = TWOPI / waveperiod; // angular frequency of the piston
 		const double waveamp = waveheight / 2.0; // Amplitude 
-		const double wavenumber = TWOPI / wavelength; // Wave Number
-
-
-		//Callculation of the wave number
-		//double temp = 1;
-		//double wave_number = 0.1; // Wave number of the wave
-		//while (abs(wave_number - temp) > 1e-5) {
-		//	temp = wave_number;
-		//	wave_number = omega*omega / (-Gravity.z* tanh(wave_number * depth));
-		//}
+		
+		//Calculation of the wave number
+		double temp = 1;
+		double wavenumber = 0.1; // Wave number of the wave
+		while (abs(wavenumber - temp) > 1e-6) {
+			temp = wavenumber;
+			wavenumber = omega*omega / (-Gravity.z* tanh(wavenumber * waterdepth));
+		}
 		//// Calculation of the Piston amplitude
 		//const double kd = wave_number * depth;
 		//double HbyS = (2 * sinh(kd) * sinh(kd)) / (sinh(kd)* cosh(kd) + kd);
@@ -2133,7 +2182,7 @@ void JSphCpu::RunMotion(double stepdt){
 
 
 
-		if (motsim)MoveVaryBound(nparts, pini, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		if (motsim)MoveVaryBound(nparts, pini, Posc0, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
 		// =========================================================================================================
 		// =========================================================================================================
 		// =========================================================================================================
