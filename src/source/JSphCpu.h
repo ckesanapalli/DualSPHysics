@@ -247,8 +247,12 @@ protected:
   //===========================================================================================================
   // void MoveVaryBound(unsigned np, unsigned ini, tmatrix4d m, double timestep, double dt, const unsigned *ridpmv, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const;
 <<<<<<< HEAD
+<<<<<<< HEAD
   void MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double phase0, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
   void MoveNewBound(unsigned np, unsigned ini, tdouble3 * pos0, double Amp_new[], double phase_new[], double wave_number[], double omega[], double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+=======
+  void MoveVaryBound(unsigned np, unsigned ini, double pistonamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+>>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
 =======
   void MoveVaryBound(unsigned np, unsigned ini, double pistonamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
 >>>>>>> parent of 67ea9b9... Stable 2-D Wave generator

@@ -2017,12 +2017,19 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
 <<<<<<< HEAD
+<<<<<<< HEAD
 void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double Amp_new, double phase0, double wave_number, double omega, double waterdepth,
 	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
 	tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const{
 	const unsigned fin = ini + np;
 	//printf(" \n np, ini, pos.x, pos.z, *code : %d %d %d \n", np, ini, *code);
 
+=======
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wave_number, double omega, double waterdepth,
+	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
+	tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const{
+	const unsigned fin = ini + np;
+>>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
 =======
 void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wave_number, double omega, double waterdepth,
 	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
@@ -2041,6 +2048,7 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wa
 			// Decaying sinusoidal motion
 			tdouble3 waveveln_h = TDouble3(0);
 <<<<<<< HEAD
+<<<<<<< HEAD
 			double kd = wave_number * waterdepth;
 			double kz = wave_number * pos0[pid].z;
 			if (pos0[pid].z >= 0) kz = 0.0;
@@ -2052,6 +2060,8 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wa
 			waveveln_h.y = 0.0;
 			waveveln_h.z = velamp* (1 - exp(-2 * (kd + kz)))* sin(phase);
 =======
+=======
+>>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
 			double velamp = waveamp* omega / sinh(wave_number * waterdepth);
 			double phase = wave_number * ps.x - omega * timestep;
 			double hphase = wave_number * (ps.z + waterdepth);
@@ -2061,6 +2071,9 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, double waveamp, double wa
 
 			waveveln_h.x = velamp* cosh(hphase)* cos(phase);
 			waveveln_h.z = velamp* sinh(hphase)* sin(phase);
+<<<<<<< HEAD
+>>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
+=======
 >>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
 
 			// Deep Water condition
@@ -2289,6 +2302,7 @@ void JSphCpu::RunMotion(double stepdt){
 			sset[i] = betaj * pow(Hs,2) * pow(Tp,-4) * pow(freqset[i],-5) * exp(-1.25*pow(Tp*freqset[i],-4)) * pow(gamma,gampower);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 			sums += sset[i] * dfreqset[i];
 			//printf("\n sset[i], dfreqset[i], gampower, betaj = %f, %f, %f, %f\n", sset[i], dfreqset[i], gampower, betaj);
 			//printf("\n pow(Hs,2), pow(Tp,-4), pow(freqset[i],-5), exp(-1.25*(Tp*pow(freqset[i],-4))) = %f, %f, %f, %f\n", pow(Hs, 2), pow(Tp, -4), pow(freqset[i], -5), exp(-1.25*(Tp*pow(freqset[i], -4))));
@@ -2336,6 +2350,9 @@ void JSphCpu::RunMotion(double stepdt){
 		//void MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
 		if (motsim)MoveVaryBound(nparts, pini, Posc0, Amp_new0, phase0, wavenumber0, omega0, depth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
 		//if (motsim)MoveNewBound(nparts, pini, Posc0, Amp_new, phase_new, wavenumber, omega, depth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+=======
+		if (motsim)MoveVaryBound(nparts, pini, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+>>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
 =======
 		if (motsim)MoveVaryBound(nparts, pini, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
 >>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
