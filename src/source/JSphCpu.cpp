@@ -2037,21 +2037,10 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
 /// Applies a Varying movement to a group of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
-void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double wave_number, double omega, double waterdepth,
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double Amp_new, double phase0, double wave_number, double omega, double waterdepth,
 	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
 	tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const{
 	const unsigned fin = ini + np;
-	/*const unsigned sizenp = np;
-	double pos0x[INT_MAX] = {};
-	double pos0y[INT_MAX] = {};
-	double pos0z[INT_MAX] = {};*/
-
-	/*double* pos0x = new double[np];
-	double* pos0y = new double[np];
-	double* pos0z = new double[np];*/
-
-
-
 	//printf(" \n np, ini, pos.x, pos.z, *code : %d %d %d \n", np, ini, *code);
 
 	for (unsigned id = ini; id<fin; id++) {
@@ -2076,8 +2065,8 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double w
 			double kz = wave_number * pos0[pid].z;
 			if (pos0[pid].z >= 0) kz = 0.0;
 			
-			double velamp = waveamp* omega * exp(kz) / (1 - exp(-2 * kd));
-			double phase = wave_number * pos0[pid].x - omega * timestep;
+			double velamp = Amp_new * omega * exp(kz) / (1 - exp(-2 * kd));
+			double phase = wave_number * pos0[pid].x - omega * timestep + phase0;
 			
 			waveveln_h.x = velamp* (1 + exp(-2 * (kd + kz)))* cos(phase);
 			waveveln_h.y = 0.0;
@@ -2088,6 +2077,8 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double w
 			// waveveln_h.z = waveamp* omega* exp(wave_number * ps.z)* sin(omega* (timestep));
 
 			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
+
+
 			
 			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
 			velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
@@ -2104,7 +2095,77 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double w
 
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
+	void JSphCpu::MoveNewBound(unsigned np, unsigned ini, tdouble3 * pos0, double Amp_new[], double phase_new[], double wave_number[], double omega[], double waterdepth,
+		double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp,
+		tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const {
+		const unsigned fin = ini + np;
+		unsigned i = 0;
+		//printf(" \n np, ini, pos.x, pos.z, *code : %d %d %d \n", np, ini, *code);
+
+		for (unsigned id = ini; id<fin; id++) {
+			const unsigned pid = RidpMove[id];
+			if (pid != UINT_MAX) {
+				tdouble3 ps = pos[pid];
+				//===============================================================================
+				//===============================================================================
+				// Wave Equation 
+				// Chaitanya Kesanapalli addition
+				//===============================================================================
+				//decaying sinusoidal motion
+				if (timestep == 0.0) {
+
+					pos0[pid] = ps;
+					//printf("\n pos0[%d].x, pos0[%d].y, pos0[%d].z = %f, %f, %f \n", pid, pid, pid, pos0[pid].x, pos0[pid].y, pos0[pid].z);
+
+				}
+				//printf("\n pos0[0][190], pos0[1][190], pos0[2][190] = %f, %f, %f \n", pos0[0][190], pos0[1][190], pos0[2][190]);
+				tdouble3 waveveln_h = TDouble3(0);
+				double kd;
+				double kz;
+				double velamp;
+				double phase;
+				i = 0;
+				//for (i = 0; i < 40; i++) {
+				kd = wave_number[i] * waterdepth;
+				kz = wave_number[i] * pos0[pid].z;
+				if (pos0[pid].z >= 0) kz = 0.0;
+
+				velamp = Amp_new[i] * omega[i] * exp(kz) / (1 - exp(-2 * kd));
+				phase = wave_number[i] * pos0[pid].x - omega[i] * timestep;// +phase_new[i];
+				//printf("\n Velamp, Phase = %f, %f\n", velamp, phase);
+
+				waveveln_h.x += velamp* (1 + exp(-2 * (kd + kz)))* cos(phase);
+				waveveln_h.y += 0.0;
+				waveveln_h.z += velamp* (1 - exp(-2 * (kd + kz)))* sin(phase);
+				//printf("\nwaveveln_h.x, waveveln_h.y, waveveln_h.z = %f, %f, %f\n", waveveln_h.x, waveveln_h.y, waveveln_h.z);
+				// Deep Water condition
+				// waveveln_h.x = waveamp* omega* exp(wave_number * ps.z)* cos(omega* (timestep));
+				// waveveln_h.z = waveamp* omega* exp(wave_number * ps.z)* sin(omega* (timestep));
+
+				//}
+
+				const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
+				//printf("\n pid, pos0[pid].x, pos0[pid].y, pos0[pid].z, dx, dy, dz = %u %f %f %f %f %f %f\n ", pid, pos0[pid].x, pos0[pid].y, pos0[pid].z, dx, dy, dz);
+
+				UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
+
+				//printf("\n ps.x, ps.y, ps.z = %f %f %f \n", ps.x, ps.y, ps.z);
+
+				velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
+
+					//===============================================================================
+					// old code (comment above and uncomment below to execute the old code)
+					// UpdatePos(pos[pid], mvpos.x, mvpos.y, mvpos.z, false, pid, pos, dcell, code);
+					// velrhop[pid].x = mvvel.x;  velrhop[pid].y = mvvel.y;  velrhop[pid].z = mvvel.z;
+
+					// printf("BAD: MOVELINBOUND is running \n");
+				}
+			}
+		}
+
+		//******************************************************************************
+		//******************************************************************************
+		//******************************************************************************
 //******************************************************************************
 
 
@@ -2152,37 +2213,122 @@ void JSphCpu::RunMotion(double stepdt){
     for(unsigned ref=0;ref<nref;ref++)if(SphMotion->ProcesTimeGetData(ref,typesimple,simplemov,simplevel,simpleace,matmov,matmov2,nparts,idbegin)){
 		// printf("Second simplemov.x = %f \n", simplemov.x);
       const unsigned pini=idbegin-CaseNfixed;
-      if(typesimple){//-Simple movement. | Movimiento simple.
-        if(Simulate2D)simplemov.y=simplevel.y=simpleace.y=0;
+	  if (typesimple) {//-Simple movement. | Movimiento simple.
+		if (Simulate2D)simplemov.y = simplevel.y = simpleace.y = 0;
 		// =========================================================================================================
 		// =========================================================================================================
 		// =========================================================================================================
 		// Chaitanya Kesanapalli addition: Calling the MoveVaryBound function ======================================
 		// Wave parameters
 		// Parameters are taken from the paper T. Verbrugghe et al. 2018
+		unsigned i;
+		const double Hs = 24.3;
+		const double Tp = 15.59;
+		const double Lp = 320;
+		const double freqset[40] = {
+			0.01603592, 0.01932534, 0.02261476, 0.02590418, 0.0291936,
+			0.03248302, 0.03577244, 0.03906186, 0.04235128, 0.0456407,
+			0.04893012, 0.05221954, 0.05550896, 0.05879838, 0.06208779,
+			0.06537721, 0.06866663, 0.07195605, 0.07524547, 0.07853489,
+			0.08182431, 0.08511373, 0.08840315, 0.09169257, 0.09498199,
+			0.09827141, 0.10156083, 0.10485025, 0.10813967, 0.11142909,
+			0.11471851, 0.11800793, 0.12129735, 0.12458677, 0.12787619,
+			0.13116561, 0.13445503, 0.13774444, 0.14103386, 0.14432328
+		};
 
-		const double waveheight = 0.1; // waveheight
-		const double waveperiod = 1.5; // waveperiod
-		const double waterdepth = 1000.0; // waterdepth
+		double dfreqset[40] = { freqset[1] - freqset[0] };
+		for (i = 1; i < sizeof(dfreqset); ++i) 
+			dfreqset[i] = freqset[i] - freqset[i-1];
+
+
+		const double gamma = 3.3;
+		const double cutf = 5;
+		const double steepness = 1/15;
+		const double PEAK_AMP = 11.9;
+		const double depth = 8000;
+		const double x0 = 480;
+		const double t0 = 23.34;
+		const double alpha = 0.5;
+
+		double omega[40];
 		
-		const double omega = TWOPI / waveperiod; // angular frequency of the piston
-		const double waveamp = waveheight / 2.0; // Amplitude 
+			
+		//const double waveheight = 0.1; // waveheight
+		//const double waveperiod = 1.5; // waveperiod
+		//const double waterdepth = 1000.0; // waterdepth
+		
+		//const double omega = TWOPI / waveperiod; // angular frequency of the piston
+		//const double waveamp = waveheight / 2.0; // Amplitude 
 		
 		//Calculation of the wave number
-		double temp = 1;
-		double wavenumber = 0.1; // Wave number of the wave
-		while (abs(wavenumber - temp) > 1e-6) {
-			temp = wavenumber;
-			wavenumber = omega*omega / (-Gravity.z* tanh(wavenumber * waterdepth));
+			
+		double sigma;
+		double gampower;
+		double sset[40];
+		double betaj;
+		double sums = 0;
+		// =========================================================================================================
+		// ================= JONSWAP Specturm ================= 
+		for (i = 0; i < 40; i++) {
+			if (freqset[i] <= 1 / Tp) {
+				sigma = 0.07;
+			}
+			else {
+				sigma = 0.09;
+			}
+			gampower = exp(-0.5*pow(((Tp*freqset[i] - 1) / sigma), 2));
+
+			betaj = 0.06238*(1.094 - 0.01915 * log(gamma)) / (0.230 + 0.0336*gamma - 0.185 / (1.9 + gamma));
+
+			sset[i] = betaj * pow(Hs,2) * pow(Tp,-4) * pow(freqset[i],-5) * exp(-1.25*pow(Tp*freqset[i],-4)) * pow(gamma,gampower);
+
+			sums += sset[i] * dfreqset[i];
+			//printf("\n sset[i], dfreqset[i], gampower, betaj = %f, %f, %f, %f\n", sset[i], dfreqset[i], gampower, betaj);
+			//printf("\n pow(Hs,2), pow(Tp,-4), pow(freqset[i],-5), exp(-1.25*(Tp*pow(freqset[i],-4))) = %f, %f, %f, %f\n", pow(Hs, 2), pow(Tp, -4), pow(freqset[i], -5), exp(-1.25*(Tp*pow(freqset[i], -4))));
 		}
-		//// Calculation of the Piston amplitude
-		//const double kd = wave_number * depth;
-		//double HbyS = (2 * sinh(kd) * sinh(kd)) / (sinh(kd)* cosh(kd) + kd);
-		//const double pistonamp = waveamp / HbyS;
+		
+		// =========================================================================================================
+		// ================= Steep Wave =================
+			
+		double Amp_new[40];
+		double phase_new[40];
+		double temp = 1;
+		double abs_steepT;
+		double transsset;
+		double sdfset;
+		double wavenumber[40] = { 0.1 }; // Wave number of the wave
 
+		for (i = 0; i < 40; i++) {
+			abs_steepT = pow(1 - alpha, 2) + pow(alpha * TWOPI* freqset[i] * Tp, 2);
+			transsset = sset[i] * pow(abs_steepT, 2);
+			sdfset = dfreqset[i] * transsset;
 
+			Amp_new[i] = PEAK_AMP*sdfset / sums;
+			//printf("\n PEAK_AMP, sdfset, sums = %f, %f, %f\n", PEAK_AMP, sdfset, sums);
 
-		if (motsim)MoveVaryBound(nparts, pini, Posc0, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+			phase_new[i] = atan2((alpha * TWOPI* freqset[i] * Tp), (1 - alpha));
+			//printf("\n=================== Amp_new[i], Phase[i] = %f, %f\n", Amp_new[i], phase_new[i]);
+			omega[i] = TWOPI * freqset[i];
+				
+			if (steepness == 0) {
+				while (abs(wavenumber[i] - temp) > 1e-6) {
+					temp = wavenumber[i];
+					wavenumber[i] = omega[i] * omega[i] / (-Gravity.z* tanh(wavenumber[i] * depth));
+				}
+			}
+			else {
+				wavenumber[i] = 0.5* TWOPI * steepness / Amp_new[i];
+			}				
+		}
+		
+		double Amp_new0 = Amp_new[0];
+		double phase0 = phase_new[0];
+		double wavenumber0 = wavenumber[0];
+		double omega0 = omega[0];
+
+		//void MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+		if (motsim)MoveVaryBound(nparts, pini, Posc0, Amp_new0, phase0, wavenumber0, omega0, depth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		//if (motsim)MoveNewBound(nparts, pini, Posc0, Amp_new, phase_new, wavenumber, omega, depth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
 		// =========================================================================================================
 		// =========================================================================================================
 		// =========================================================================================================

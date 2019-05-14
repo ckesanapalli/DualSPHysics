@@ -34,18 +34,18 @@
                         <point x="-0.15" y="0" z="-1" />
                         <size x="0.15" y="0.4" z="2" />
                     </drawbox>
-                    <shapeout file="box" reset="true" />
+                    <!-- <shapeout file="box" reset="true" /> -->
                     <!--CREATION OF BOUNDARY PARTICLES (WAVEMAKER 2) -->
-                    <setdrawmode mode="full" />
-                    <setmkbound mk="11" />
+                    <!-- <setdrawmode mode="full" /> -->
+                    <!-- <setmkbound mk="11" /> -->
                     <drawbox cmt="Piston">
                         <boxfill>solid</boxfill>
                         <point x="5" y="0" z="-1" />
                         <size x="0.15" y="0.4" z="2" />
                     </drawbox>
                     <!-- CREATION OF BOUNDARY PARTICLES (WAVEMAKER 3) -->
-                    <setdrawmode mode="full" />
-                    <setmkbound mk="12" />
+                    <!-- <setdrawmode mode="full" /> -->
+                    <!-- <setmkbound mk="12" /> -->
                     <drawbox cmt="Piston">
                         <boxfill>solid</boxfill>
                         <point x="-0.15" y="0" z="-1.15" />
@@ -88,25 +88,25 @@
                     <!-- <file name="CaseWavemaker2D_Piston_Movement.dat" fields="3" fieldtime="0" fieldx="1" /> -->
                 <!-- </mvfile> -->
             </objreal>
-			<objreal ref="11">
-                <begin mov="1" start="0.00" finish="1000" />
-				<mvrectsinu id="1" duration="1000" anglesunits="radians">
-                    <freq x="0.3" y="0" z="0" />
-                    <ampl x="0.12" y="0" z="0" />
-                    <phase x="0" y="0" z="0" />
-                </mvrectsinu>
-                <!-- <mvfile id="1" duration="25"> -->
-                    <!-- <file name="CaseWavemaker2D_Piston_Movement.dat" fields="3" fieldtime="0" fieldx="1" /> -->
-                <!-- </mvfile> -->
-            </objreal>
-			<objreal ref="12">
-                <begin mov="1" start="0.00" finish="1000" />
-				<mvrectsinu id="1" duration="1000" anglesunits="radians">
-                    <freq x="0.3" y="0" z="0" />
-                    <ampl x="0.12" y="0" z="0" />
-                    <phase x="0" y="0" z="0" />
-                </mvrectsinu>
-            </objreal>
+			<!-- <objreal ref="11"> -->
+                <!-- <begin mov="1" start="0.00" finish="1000" /> -->
+				<!-- <mvrectsinu id="1" duration="1000" anglesunits="radians"> -->
+                    <!-- <freq x="0.3" y="0" z="0" /> -->
+                    <!-- <ampl x="0.12" y="0" z="0" /> -->
+                    <!-- <phase x="0" y="0" z="0" /> -->
+                <!-- </mvrectsinu> -->
+                <!-- <!-- <mvfile id="1" duration="25"> --> -->
+                    <!-- <!-- <file name="CaseWavemaker2D_Piston_Movement.dat" fields="3" fieldtime="0" fieldx="1" /> --> -->
+                <!-- <!-- </mvfile> --> -->
+            <!-- </objreal> -->
+			<!-- <objreal ref="12"> -->
+                <!-- <begin mov="1" start="0.00" finish="1000" /> -->
+				<!-- <mvrectsinu id="1" duration="1000" anglesunits="radians"> -->
+                    <!-- <freq x="0.3" y="0" z="0" /> -->
+                    <!-- <ampl x="0.12" y="0" z="0" /> -->
+                    <!-- <phase x="0" y="0" z="0" /> -->
+                <!-- </mvrectsinu> -->
+            <!-- </objreal> -->
         </motion>
     </casedef>
     <execution>
@@ -117,7 +117,7 @@
             <parameter key="Kernel" value="2" comment="Interaction Kernel 1:Cubic Spline, 2:Wendland (def=1)" />
             <parameter key="ViscoTreatment" value="1" comment="Viscosity Formulation 1:Artificial, 2:Laminar+SPS (def=1)" />
             <parameter key="Visco" value="0.02" comment="Viscosity value" /> % Note alpha can depend on the resolution. A value of 0.01 is recommended for near irrotational flows.
-            <parameter key="ViscoBoundFactor" value="0" comment="Multiply viscosity value with boundary (def=1)" />
+            <parameter key="ViscoBoundFactor" value="1" comment="Multiply viscosity value with boundary (def=1)" />
             <parameter key="DeltaSPH" value="0.0" comment="DeltaSPH value, 0.1 is the typical value, with 0 disabled (def=0)" />
             <parameter key="CoefDtMin" value="0.05" comment="Coefficient to calculate minimum time step dtmin=coefdtmin*h/speedsound (def=0.05)" />
             <parameter key="#DtIni" value="0.0001" comment="Initial time step (def=h/speedsound)" />
