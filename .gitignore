@@ -7,6 +7,7 @@ src/VS/*
 !src/VS/*.sln
 
 ## Ignores output of examples in 01_DamBreak.
+examples
 examples/main/06_Wavemaker_old/CaseWavemaker*out*
 examples/main/06_Wavemaker/CaseWavemaker*out*
 examples/main/06_Wavemaker2D/CaseWavemaker*out*

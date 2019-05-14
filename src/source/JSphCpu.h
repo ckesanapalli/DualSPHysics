@@ -72,12 +72,7 @@ protected:
   unsigned *Dcellc;  ///<Cells inside DomCells coded with DomCellCode. | Celda dentro de DomCells codificada con DomCellCode.
   tdouble3 *Posc;
   tfloat4 *Velrhopc;
-  //==============================================================================
-  //==============================================================================
-  // Chaitanya Kesanapalli
-  tdouble3 *Posc0; // Initial Particle Position
-  //==============================================================================
-  //==============================================================================
+    
   //-Variables for compute step: VERLET. | Vars. para compute step: VERLET.
   tfloat4 *VelrhopM1c;  ///<Verlet: in order to keep previous values. | Verlet: para guardar valores anteriores.
 
@@ -251,8 +246,12 @@ protected:
   // Chaitanya Kesanapalli Addition: Varying Boundary Condition
   //===========================================================================================================
   // void MoveVaryBound(unsigned np, unsigned ini, tmatrix4d m, double timestep, double dt, const unsigned *ridpmv, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const;
+<<<<<<< HEAD
   void MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double phase0, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
   void MoveNewBound(unsigned np, unsigned ini, tdouble3 * pos0, double Amp_new[], double phase_new[], double wave_number[], double omega[], double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+=======
+  void MoveVaryBound(unsigned np, unsigned ini, double pistonamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+>>>>>>> parent of 67ea9b9... Stable 2-D Wave generator
   //===========================================================================================================
   //***********************************************************************************************************
   //***********************************************************************************************************

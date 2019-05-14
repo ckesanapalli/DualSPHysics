@@ -2,8 +2,8 @@
 
 rem "name" and "dirout" are named according to the testcase
 
-set name=CaseWavemaker2D
-set dirout=%name%_CPU_out
+set name=CaseWavemaker
+set dirout=%name%_out
 set diroutdata=%dirout%\data
 
 rem "executables" are renamed and called from their directory
@@ -28,27 +28,28 @@ mkdir %dirout%
 if not "%ERRORLEVEL%" == "0" goto fail
 mkdir %diroutdata%
 
-rem a copy of CaseWavemaker2D_Piston_Movement.dat must exist in dirout
-
-copy CaseWavemaker2D_Piston_Movement.dat %dirout%
-
 rem CODES are executed according the selected parameters of execution in this testcase
 
 %gencase% %name%_Def %dirout%/%name% -save:all
 if not "%ERRORLEVEL%" == "0" goto fail
 
+set dirout2=%dirout%\boundary
+mkdir %dirout2%
+%boundaryvtk% -loadvtk %dirout%/%name%__Actual.vtk -filexml %dirout%/%name%.xml -savevtkdata %dirout2%/MotionPREPiston -onlymk:21  
+if not "%ERRORLEVEL%" == "0" goto fail
+
 %dualsphysicscpu% -cpu %dirout%/%name% %dirout% -dirdataout data -svres
+if not "%ERRORLEVEL%" == "0" goto fail
+
+%boundaryvtk% -loadvtk %dirout%/%name%__Actual.vtk -filexml %dirout%/%name%.xml -motiondatatime %diroutdata% -savevtkdata %dirout2%/MotionPiston -onlymk:21 -savevtkdata %dirout2%/Box.vtk -onlymk:11
 if not "%ERRORLEVEL%" == "0" goto fail
 
 set dirout2=%dirout%\particles
 mkdir %dirout2%
-%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFluid -onlytype:-all,+fluid
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartFLuid -onlytype:-all,+fluid
 if not "%ERRORLEVEL%" == "0" goto fail
 
-%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartMoving -onlytype:-all,+moving
-if not "%ERRORLEVEL%" == "0" goto fail
-
-%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartBox -onlytype:-all,+fixed
+%partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartPiston -onlytype:-all,+moving
 if not "%ERRORLEVEL%" == "0" goto fail
 
 %partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
@@ -56,20 +57,16 @@ if not "%ERRORLEVEL%" == "0" goto fail
 
 set dirout2=%dirout%\measuretool
 mkdir %dirout2%
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg1_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg1 -savevtk %dirout2%/wg1
+%measuretool% -dirin %diroutdata% -points CaseWavemaker_PointsHeights.txt -onlytype:-all,+fluid -height -savevtk %dirout2%/PointsHeights -savecsv %dirout2%/_PointsHeight 
 if not "%ERRORLEVEL%" == "0" goto fail
 
-REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg2_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg2 -savevtk %dirout2%/wg2
-REM if not "%ERRORLEVEL%" == "0" goto fail
+%measuretool% -dirin %diroutdata% -points CaseWavemaker_wg0_3D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_WG0 
+if not "%ERRORLEVEL%" == "0" goto fail
 
-REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg3_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg3 -savevtk %dirout2%/wg3
-REM if not "%ERRORLEVEL%" == "0" goto fail
- 
-REM set dirout2=%dirout%\forces
-REM mkdir %dirout2%
-REM %computeforces% -dirin %diroutdata% -onlyid:1616-1669 -savecsv %dirout2%/_WallForce -savevtk %dirout2%/WallForce
-REM if not "%ERRORLEVEL%" == "0" goto fail
-rem Note that initial hydrostatic force is 20.72 N (initial column water 0.065 high) 
+set dirout2=%dirout%\surface
+mkdir %dirout2%
+%isosurface% -dirin %diroutdata% -saveiso %dirout2%/Surface 
+if not "%ERRORLEVEL%" == "0" goto fail
 
 
 :success
@@ -81,3 +78,4 @@ echo Execution aborted.
 
 :end
 pause
+
