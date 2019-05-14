@@ -31,3 +31,4 @@ examples/main-GPU/02_Shipsail/.vs/02_Shipsail/v15/.suo
 *.ibi4
 *.obi4
 *.sh
+src/source/buffer/buf1.cpp
