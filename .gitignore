@@ -17,3 +17,5 @@ bin/windows/*.ipdb
 
 ## My additions to ignore
 examples/*
+examples/main/07_WavemakerFile/wCaseWavemaker2D_win64_CPU.bat
+examples/main/07_WavemakerFile/wCaseWavemaker2D_win64_CPU.bat

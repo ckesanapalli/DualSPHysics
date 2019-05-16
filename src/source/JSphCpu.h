@@ -251,12 +251,16 @@ protected:
   // Chaitanya Kesanapalli Addition: Varying Boundary Condition
   //===========================================================================================================
   // void MoveVaryBound(unsigned np, unsigned ini, tmatrix4d m, double timestep, double dt, const unsigned *ridpmv, tdouble3 *pos, unsigned *dcell, tfloat4 *velrhop, typecode *code)const;
-  void MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double wave_number, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+  void MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double initphase, double wavenumber, double omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+  void Move1Bound(unsigned np, unsigned ini, tdouble3 * pos0, double* waveamp, double* initphase, double* wavenumber, double* omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+  void Move2Bound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double* initphase, double* wavenumber, double* omega, unsigned nfreq, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
+  void Move3Bound(unsigned np, unsigned ini, tdouble3 * pos0, double x0, double t0, double* waveamp, double* initphase, double* wavenumber, double* omega, unsigned nfreq, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const;
   //===========================================================================================================
   //***********************************************************************************************************
   //***********************************************************************************************************
 
   void CalcMotion(double stepdt);
+  double randd();
   void RunMotion(double stepdt);
   void RunDamping(double dt,unsigned np,unsigned npb,const tdouble3 *pos,const typecode *code,tfloat4 *velrhop)const;
 

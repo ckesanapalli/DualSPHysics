@@ -33,7 +33,7 @@
 #include "JSphAccInput.h"
 #include "JGaugeSystem.h"
 #include <climits>
-
+#include <cstdlib>
 using namespace std;
 
 //==============================================================================
@@ -2039,23 +2039,11 @@ void JSphCpu::MoveMatBound(unsigned np,unsigned ini,tmatrix4d m, double dt
 /// Applies a Varying movement to a group of particles.
 /// Aplica un movimiento matricial a un conjunto de particulas.
 //==============================================================================
-void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double wave_number, double omega, double waterdepth,
+void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double initphase, double wave_number, double omega, double waterdepth,
 	double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, const unsigned * ridp, 
 	tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const{
 	const unsigned fin = ini + np;
-	/*const unsigned sizenp = np;
-	double pos0x[INT_MAX] = {};
-	double pos0y[INT_MAX] = {};
-	double pos0z[INT_MAX] = {};*/
-
-	/*double* pos0x = new double[np];
-	double* pos0y = new double[np];
-	double* pos0z = new double[np];*/
-
-
-
-	//printf(" \n np, ini, pos.x, pos.z, *code : %d %d %d \n", np, ini, *code);
-
+	
 	for (unsigned id = ini; id<fin; id++) {
 		const unsigned pid = RidpMove[id];
 		if (pid != UINT_MAX) {
@@ -2065,29 +2053,17 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double w
 			// Wave Equation 
 			// Chaitanya Kesanapalli addition
 			//===============================================================================
-			 //decaying sinusoidal motion
-			//if (timestep == 0.0) {
-			//	
-			//	pos0[pid] = ps;
-			//	//printf("\n pos0[%d].x, pos0[%d].y, pos0[%d].z = %f, %f, %f \n", pid, pid, pid, pos0[pid].x, pos0[pid].y, pos0[pid].z);
-			//	
-			//}
-			//printf("\n pos0[0][190], pos0[1][190], pos0[2][190] = %f, %f, %f \n", pos0[0][190], pos0[1][190], pos0[2][190]);
 			tdouble3 waveveln_h = TDouble3(0);
 			double kd = wave_number * waterdepth;
 			double kz = wave_number * pos0[pid].z;
 			if (pos0[pid].z >= 0) kz = 0.0;
 			
 			double velamp = waveamp* omega * exp(kz) / (1 - exp(-2 * kd));
-			double phase = wave_number * pos0[pid].x - omega * timestep;
+			double phase = wave_number * pos0[pid].x - omega * timestep + initphase;
 			
 			waveveln_h.x = velamp* (1 + exp(-2 * (kd + kz)))* cos(phase);
 			waveveln_h.y = 0.0;
 			waveveln_h.z = velamp* (1 - exp(-2 * (kd + kz)))* sin(phase);
-
-			// Deep Water condition
-			// waveveln_h.x = waveamp* omega* exp(wave_number * ps.z)* cos(omega* (timestep));
-			// waveveln_h.z = waveamp* omega* exp(wave_number * ps.z)* sin(omega* (timestep));
 
 			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
 			
@@ -2109,6 +2085,170 @@ void JSphCpu::MoveVaryBound(unsigned np, unsigned ini, tdouble3 * pos0, double w
 //******************************************************************************
 //******************************************************************************
 
+void JSphCpu::Move1Bound(unsigned np, unsigned ini, tdouble3 * pos0, double* waveamp, double* initphase, double* wavenumber, 
+	double* omega, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel, 
+	const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const {
+
+	const unsigned fin = ini + np;
+
+	for (unsigned id = ini; id<fin; id++) {
+		const unsigned pid = RidpMove[id];
+		if (pid != UINT_MAX) {
+			tdouble3 ps = pos[pid];
+			//===============================================================================
+			//===============================================================================
+			// Wave Equation 
+			// Chaitanya Kesanapalli addition
+			//===============================================================================
+			tdouble3 waveveln_h = TDouble3(0);
+			unsigned i;
+			double kd;
+			double kz;
+			double velamp;
+			double phase;
+			for (i = 0; i < sizeof(2); i++) {
+				kd = wavenumber[i] * waterdepth;
+				kz = wavenumber[i] * pos0[pid].z;
+				if (pos0[pid].z >= 0) kz = 0.0;
+
+				velamp = waveamp[i] * omega[i] * exp(kz) / (1 - exp(-2 * kd));
+				phase = wavenumber[i] * pos0[pid].x - omega[i] * timestep + initphase[i];
+
+				waveveln_h.x += velamp* (1 + exp(-2 * (kd + kz)))* cos(phase);
+				waveveln_h.y += 0.0;
+				waveveln_h.z += velamp* (1 - exp(-2 * (kd + kz)))* sin(phase);
+			}
+			
+
+			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
+
+			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
+			velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
+
+			//===============================================================================
+			// old code (comment above and uncomment below to execute the old code)
+			// UpdatePos(pos[pid], mvpos.x, mvpos.y, mvpos.z, false, pid, pos, dcell, code);
+			// velrhop[pid].x = mvvel.x;  velrhop[pid].y = mvvel.y;  velrhop[pid].z = mvvel.z;
+
+			// printf("BAD: MOVELINBOUND is running \n");
+		}
+	}
+}
+
+
+void JSphCpu::Move2Bound(unsigned np, unsigned ini, tdouble3 * pos0, double waveamp, double* initphase, double* wavenumber,
+	double* omega, unsigned nfreq, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel,
+	const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const {
+
+	const unsigned fin = ini + np;
+
+	for (unsigned id = ini; id<fin; id++) {
+		const unsigned pid = RidpMove[id];
+		if (pid != UINT_MAX) {
+			tdouble3 ps = pos[pid];
+			//===============================================================================
+			//===============================================================================
+			// Wave Equation 
+			// Chaitanya Kesanapalli addition
+			//===============================================================================
+			tdouble3 waveveln_h = TDouble3(0);
+			unsigned i;
+			double kd;
+			double kz;
+			double velamp;
+			double phase;
+			for (i = 0; i < nfreq; i++) {
+				kd = wavenumber[i] * waterdepth;
+				kz = wavenumber[i] * pos0[pid].z;
+				if (pos0[pid].z >= 0) kz = 0.0;
+
+				velamp = waveamp * omega[i] * exp(kz) / (1 - exp(-2 * kd));
+				phase = wavenumber[i] * pos0[pid].x - omega[i] * timestep + initphase[i];
+
+				waveveln_h.x += velamp* (1 + exp(-2 * (kd + kz)))* cos(phase);
+				waveveln_h.y += 0.0;
+				waveveln_h.z += velamp* (1 - exp(-2 * (kd + kz)))* sin(phase);
+			}
+			//printf("\n waveveln_h.x, waveveln_h.y, waveveln_h.z = %f, %f, %f \n", waveveln_h.x, waveveln_h.y, waveveln_h.z);
+
+			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
+
+			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
+			velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
+
+			//===============================================================================
+			// old code (comment above and uncomment below to execute the old code)
+			// UpdatePos(pos[pid], mvpos.x, mvpos.y, mvpos.z, false, pid, pos, dcell, code);
+			// velrhop[pid].x = mvvel.x;  velrhop[pid].y = mvvel.y;  velrhop[pid].z = mvvel.z;
+
+			// printf("BAD: MOVELINBOUND is running \n");
+		}
+	}
+}
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+void JSphCpu::Move3Bound(unsigned np, unsigned ini, tdouble3 * pos0, double x0, double t0, double* waveamp, double* initphase, double* wavenumber,
+	double* omega, unsigned nfreq, double waterdepth, double timestep, double dt, const tdouble3 & mvpos, const tfloat3 & mvvel,
+	const unsigned * ridp, tdouble3 * pos, unsigned * dcell, tfloat4 * velrhop, typecode * code) const {
+
+	const unsigned fin = ini + np;
+
+	for (unsigned id = ini; id<fin; id++) {
+		const unsigned pid = RidpMove[id];
+		if (pid != UINT_MAX) {
+			tdouble3 ps = pos[pid];
+			//===============================================================================
+			//===============================================================================
+			// Wave Equation 
+			// Chaitanya Kesanapalli addition
+			//===============================================================================
+			tdouble3 waveveln_h = TDouble3(0);
+			unsigned i;
+			for (i = 0; i < nfreq; i++) {
+				double kd = wavenumber[i] * waterdepth;
+				double kz = wavenumber[i] * pos0[pid].z;
+				if (pos0[pid].z >= 0) kz = 0.0;
+
+				double velamp = waveamp[i] * omega[i] * exp(kz);
+				double phase = wavenumber[i] * (pos0[pid].x - x0) - omega[i] * (timestep - t0) + initphase[i];
+
+				waveveln_h.x += velamp * cos(phase);
+				waveveln_h.y += 0.0;
+				waveveln_h.z += velamp * sin(phase);
+
+			}
+
+
+			const double dx = waveveln_h.x * dt, dy = waveveln_h.y * dt, dz = waveveln_h.z * dt;
+			//printf("\nBefore UpdatePos\n");
+			UpdatePos(ps, dx, dy, dz, false, pid, pos, dcell, code);
+			velrhop[pid].x = float(waveveln_h.x);  velrhop[pid].y = float(waveveln_h.y);  velrhop[pid].z = float(waveveln_h.z);
+			/*if (pid == 864) {
+				printf("\n pos0[%u].x, pos0[%u].y, pos0[%u].z = %f, %f, %f \n",
+					pid, pid, pid, pos0[pid].x, pos0[pid].y, pos0[pid].z);
+
+				printf("\n waveveln_h.x, waveveln_h.y, waveveln_h.z = %f, %f, %f \n", waveveln_h.x, waveveln_h.y, waveveln_h.z);
+				printf("\n dx, dy, dz = %f, %f, %f \n", dx, dy, dz);
+			}*/
+
+			//printf("\nAfter UpdatePos\n");
+			//===============================================================================
+			// old code (comment above and uncomment below to execute the old code)
+			// UpdatePos(pos[pid], mvpos.x, mvpos.y, mvpos.z, false, pid, pos, dcell, code);
+			// velrhop[pid].x = mvvel.x;  velrhop[pid].y = mvvel.y;  velrhop[pid].z = mvvel.z;
+
+			// printf("BAD: MOVELINBOUND is running \n");
+		}
+	}
+}
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
 
 
 //==============================================================================
@@ -2127,6 +2267,10 @@ void JSphCpu::CalcMotion(double stepdt){
 /// Process movement of boundary particles.
 /// Procesa movimiento de boundary particles.
 //==============================================================================
+double JSphCpu::randd() {
+	return (double)rand() / ((double)RAND_MAX + 1);
+}
+
 void JSphCpu::RunMotion(double stepdt){
   const char met[]="RunMotion";
   TmcStart(Timers,TMC_SuMotion);
@@ -2156,11 +2300,14 @@ void JSphCpu::RunMotion(double stepdt){
       const unsigned pini=idbegin-CaseNfixed;
       if(typesimple){//-Simple movement. | Movimiento simple.
 
-		  const unsigned typewave = 0;
+		  // =========================================================================================================
 		  // 0 - Regular Wave
-		  // 1 - Random Wave
-		  // 2 - New Wave 
-
+		  // 1 - two Regular Wave
+		  // 2 - n Regular Wave
+		  // 3 - n Random Wave (JONSWAP)
+		  // 4 - New Wave (STEEP JONSWAP)
+		  const unsigned typewave = 3;
+		  // =========================================================================================================
 		  if (typewave == 0) {
 
 			  if (Simulate2D)simplemov.y = simplevel.y = simpleace.y = 0;
@@ -2186,19 +2333,138 @@ void JSphCpu::RunMotion(double stepdt){
 				  temp = wavenumber;
 				  wavenumber = omega*omega / (-Gravity.z* tanh(wavenumber * waterdepth));
 			  }
-			  //// Calculation of the Piston amplitude
-			  //const double kd = wave_number * depth;
-			  //double HbyS = (2 * sinh(kd) * sinh(kd)) / (sinh(kd)* cosh(kd) + kd);
-			  //const double pistonamp = waveamp / HbyS;
-
-
-			  if (motsim)MoveVaryBound(nparts, pini, Posc0, waveamp, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+			  
+			  if (motsim)MoveVaryBound(nparts, pini, Posc0, waveamp, initphase, wavenumber, omega, waterdepth, TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
 		  }
-
+		  // =========================================================================================================
 		  else if (typewave == 1) {
 
-		  }
+			  const double waveheight[2] = { 0.1, 0.2 }; // waveheight
+			  const double waveperiod[2] = { 1.5, 1.6 }; // waveperiod
+			  const double waterdepth = 1000.0; // waterdepth
 
+			  double initphase[2] = { 1.0, 2.0 }; // Initial Phase
+			  double omega[2] = { TWOPI / waveperiod[0], TWOPI / waveperiod[1] }; // angular frequency of the piston
+			  double waveamp[2] = { waveheight[0] / 2.0, waveheight[1] / 2.0 }; // Amplitude 
+
+			  //Calculation of the wave number assuming deep water condition
+			  double wavenumber[2] = { -omega[0]* omega[0] /Gravity.z, -omega[1] * omega[1] / Gravity.z }; // Wave number of the wave
+			  //printf("Gravity.z  = %f\n", Gravity.z);
+			  if (motsim)Move1Bound(nparts, pini, Posc0, waveamp, initphase, wavenumber, omega, waterdepth, 
+				  TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+			  
+		  }
+		  // =========================================================================================================
+		  else if (typewave == 2) {
+			  unsigned i;
+			  double waveheight = 0.4; // waveheight
+			  double waterdepth = 1000.0; // waterdepth
+			  const unsigned nfreq = 10;
+			  //const double Tp = 17;
+			  //const double cutf = 1;
+			  double waveperiod[nfreq]; // waveperiod
+			  double initphase[nfreq];
+			  double omega[nfreq];
+			  double wavenumber[nfreq];
+
+			  double waveamp = waveheight / 2.0;
+			  
+
+			  for (i = 0; i < nfreq; i++) {
+				  waveperiod[i] = 1 + i * 0.2;
+				  //waveperiod[i] = 1.5;
+
+				  initphase[i] = TWOPI * randd(); // Initial Phase
+				  omega[i] = TWOPI / waveperiod[i]; // angular frequency of the piston
+				  wavenumber[i] = -omega[i] * omega[i] / Gravity.z; // Wave number of the wave
+
+				  //printf("\n waveperiod[i], initphase[i], omega[i], wavenumber[i] = %f, %f, %f, %f \n", waveperiod[i], initphase[i], omega[i], wavenumber[i]);
+			  }
+			  if (motsim)Move2Bound(nparts, pini, Posc0, waveamp, initphase, wavenumber, omega, nfreq, waterdepth,
+			  TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		  }
+		  // =========================================================================================================
+		  else if (typewave == 3) {
+			  double waterdepth = 8000.0; // waterdepth
+			  const double Hs = 20.2;
+			  const double Tp = 20;
+			  const double cutf = 3;
+			  const double PEAK_AMP = 15.0;
+			  //const double steepness = 1 / 15;
+
+			  const double Tstart = 1.5 * Tp;
+			  const double Tend = 0.5 / cutf;
+			  const unsigned nfreq = 10;
+			  double tstep = (Tstart - Tend) / nfreq;
+			  double waveperiod[nfreq]; // waveperiod
+			  double freqset[nfreq];
+			  double dfreqset[nfreq];
+			  
+			  double omega[nfreq];
+			  double wavenumber[nfreq];
+			  double initphase[nfreq] = { 0.0 };
+
+			  const double gamma = 3.3;
+			  double sigma;
+			  double gampower;
+			  double sset[nfreq];
+			  double sdfset[nfreq];
+			  double betaj = 0.06238*(1.094 - 0.01915 * log(gamma)) / (0.230 + 0.0336*gamma - 0.185 / (1.9 + gamma));
+			  double sums = 0;
+
+
+			  for (int i = 0; i < nfreq; i++) {
+				  waveperiod[i] = Tstart - i * tstep;
+				  freqset[i] = 1 / (Tstart - i * tstep);
+				  initphase[i] = 0.0; // Initial Phase
+				  omega[i] = TWOPI / (Tstart - i * tstep); // angular frequency of the piston
+				  wavenumber[i] = -omega[i] * omega[i] / Gravity.z; // Wave number of the wave
+				
+			  //}
+			  
+			  //for (int i = 1; i < sizeof(dfreqset); i++)
+				  if (i == 0) dfreqset[i] = freqset[i+1] - freqset[i];
+				  else dfreqset[i] = freqset[i] - freqset[i - 1];
+			  
+			  // =========================================================================================================
+			  // ================= JONSWAP Specturm ================= 
+			  
+			  //for (int i = 0; i < nfreq; i++) {
+			    if (freqset[i] <= 1 / Tp) {
+					  sigma = 0.07;
+				  }
+				  else {
+					  sigma = 0.09;
+				  }
+				  gampower = exp(-0.5*pow(((Tp*freqset[i] - 1) / sigma), 2));
+				  sset[i] = betaj * pow(Hs, 2) * pow(Tp, -4) * pow(freqset[i], -5) * exp(-1.25*pow(Tp*freqset[i], -4)) * pow(gamma, gampower);
+				  sdfset[i] = sset[i] * dfreqset[i];
+				  sums += sdfset[i];
+				  //printf("\n sset[i], dfreqset[i], gampower, betaj = %f, %f, %f, %f\n", sset[i], dfreqset[i], gampower, betaj);
+				  //printf("\n pow(Hs,2), pow(Tp,-4), pow(freqset[i],-5), exp(-1.25*(Tp*pow(freqset[i],-4))) = %f, %f, %f, %f\n", pow(Hs, 2), pow(Tp, -4), pow(freqset[i], -5), exp(-1.25*(Tp*pow(freqset[i], -4))));
+				  //printf("\n 5. waveperiod[%d], initphase[%d], omega[%d], wavenumber[%d] = %f, %f, %f, %f \n",
+				  //  i, i, i, i, waveperiod[i], initphase[i], omega[i], wavenumber[i]);
+			  }
+			  
+			  // =========================================================================================================
+			  // ================= Steep Wave Amplitude =================
+
+			  double Amp_rand[nfreq];
+			  for (int i = 0; i < nfreq; i++) {
+				  Amp_rand[i] = PEAK_AMP *sdfset[i] / sums;
+				  /*printf("\n waveperiod[%d], initphase[%d], omega[%d], wavenumber[%d] = %f, %f, %f, %f \n",
+					  i, i, i, i, waveperiod[i], initphase[i], omega[i], wavenumber[i]);*/
+			  }
+			  
+			  double x0 = 0;
+			  double t0 = 0;
+
+			  // =========================================================================================================
+
+			  if (motsim)Move3Bound(nparts, pini, Posc0, x0, t0, Amp_rand, initphase, wavenumber, omega, nfreq, waterdepth,
+				  TimeStep, stepdt, simplemov, ToTFloat3(simplevel), RidpMove, Posc, Dcellc, Velrhopc, Codec);
+		  }
+		  // =========================================================================================================
 		// =========================================================================================================
 		// =========================================================================================================
 		// if(motsim)MoveLinBound   (nparts,pini,simplemov,ToTFloat3(simplevel),RidpMove,Posc,Dcellc,Velrhopc,Codec);

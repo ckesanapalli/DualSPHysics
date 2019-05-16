@@ -51,19 +51,19 @@ if not "%ERRORLEVEL%" == "0" goto fail
 REM %partvtk% -dirin %diroutdata% -savevtk %dirout2%/PartBox -onlytype:-all,+fixed
 REM if not "%ERRORLEVEL%" == "0" goto fail
 
-%partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
-if not "%ERRORLEVEL%" == "0" goto fail
+REM %partvtkout% -dirin %diroutdata% -savevtk %dirout2%/PartFluidOut -SaveResume %dirout2%/_ResumeFluidOut
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-set dirout2=%dirout%\measuretool
-mkdir %dirout2%
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg1_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg1 -savevtk %dirout2%/wg1
-if not "%ERRORLEVEL%" == "0" goto fail
+REM set dirout2=%dirout%\measuretool
+REM mkdir %dirout2%
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg1_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg1 -savevtk %dirout2%/wg1
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg2_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg2 -savevtk %dirout2%/wg2
-if not "%ERRORLEVEL%" == "0" goto fail
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg2_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg2 -savevtk %dirout2%/wg2
+REM if not "%ERRORLEVEL%" == "0" goto fail
 
-%measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg3_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg3 -savevtk %dirout2%/wg3
-if not "%ERRORLEVEL%" == "0" goto fail
+REM %measuretool% -dirin %diroutdata% -points CaseWavemaker2D_wg3_2D.txt -onlytype:-all,+fluid -height -savecsv %dirout2%/_wg3 -savevtk %dirout2%/wg3
+REM if not "%ERRORLEVEL%" == "0" goto fail
  
 REM set dirout2=%dirout%\forces
 REM mkdir %dirout2%
